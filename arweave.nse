@@ -103,7 +103,7 @@ license = "ISC-OpenBSD"
 description = [[
 Idendify and collect information about arweave gateways and miners.
 ]]
-categories = {"default", "discovery", "safe"}
+categories = {"default", "discovery", "safe", "version"}
 portrule = shortport.port_or_service(1984, "arweave", "tcp", "open")
 
 local api = {
@@ -227,37 +227,171 @@ local api = {
       method = "get",
       path = { "wallet_list" }
    }
+}
 
-   -- price_size = {
-   --    path = {"price", { name = "size" } }
-   -- },
-   -- price_size_target = {
-   --    path = { "price", { name = "size" }, "target" }
-   -- },
-   -- wallet_balance = {
-   --    path = { "wallet", { name = "address" }, "balance" }
-   -- },
-   -- wallet_last_tx = {
-   --    path = { "wallet" , { name = "address" }, "last_tx" }
-   -- },
-   -- block_height = {
-   --    path = { "block", "height", { name = "height" } }
-   -- },
-   -- block_hash = {
-   --    path = { "block", "hash", { name = "hash" } }
-   -- },
-   -- tx = {
-   --    path = { "tx", { name = "tx_id" } }
-   -- },
-   -- tx_offset = {
-   --    path = { "tx", { name = "tx_id" }, "offset" }
-   -- },
-   -- tx_status = {
-   --    path = { "tx", { name = "tx_id" } , "status" }
-   -- },
-   -- chunks = {
-   --    path = { "chunk", { name = "offset" } }
-   -- }
+local default_headers = {
+   {"content-type", "application/json"}
+}
+
+-- not supported yet
+local api_params = {
+
+   -- head methods
+   head_root = {
+      method = "head",
+      path = {}
+   },
+   head_info = {
+      method = "head",
+      path = { "info" }
+   },
+
+   -- get methods
+   price_size = {
+      method = "get",
+      path = {"price", { name = "size" } }
+   },
+   price_size_target = {
+      method = "get",
+      path = { "price", { name = "size" }, "target" }
+   },
+   wallet_balance = {
+      method = "get",
+      path = { "wallet", { name = "address" }, "balance" }
+   },
+   wallet_last_tx = {
+      method = "get",
+      path = { "wallet" , { name = "address" }, "last_tx" }
+   },
+   block_height = {
+      method = "get",
+      path = { "block", "height", { name = "height" } }
+   },
+   block_hash = {
+      method = "get",
+      path = { "block", "hash", { name = "hash" } }
+   },
+   tx = {
+      method = "get",
+      path = { "tx", { name = "tx_id" } }
+   },
+   tx_offset = {
+      method = "get",
+      path = { "tx", { name = "tx_id" }, "offset" }
+   },
+   tx_status = {
+      method = "get",
+      path = { "tx", { name = "tx_id" } , "status" }
+   },
+   chunks = {
+      method = "get",
+      path = { "chunk", { name = "offset" } }
+   },
+   admin_queue_tx = {
+      method = "post",
+      path = { "ar-io", "admin", "queue-tx" }
+   },
+   admin_block_data = {
+      method = "put",
+      path = { "ar-io", "admin", "block-data" }
+   },
+   get_farcaster_frame_tx = {
+      method = "get",
+      path = { "local", "farcaster", "frame", { name = "tx_id" } }
+   },
+
+   -- post methods
+   post_farcaster_frame_tx = {
+      method = "post",
+      path = { "local", "farcaster", "frame", { name = "tx_id" } },
+      params = {}
+   },
+   post_block2 = {
+      method = "post",
+      path = { "block2" },
+      params = {}
+   },
+   post_block_announcement = {
+      method = "post",
+      path = { "block_announcement" },
+      params = {}
+   },
+   post_block = {
+      method = "post",
+      path = { "block" },
+      params = {}
+   },
+   post_chunk = {
+      method = "post",
+      path = { "chunk" },
+      params = {}
+   },
+   post_coordinated_mining_h1 = {
+      method = "post",
+      path = { "coordinated_mining", "h1" },
+      params = {}
+   },
+   post_coordinated_mining_h2 = {
+      method = "post",
+      path = { "coordinated_mining", "h2" },
+      params = {}
+   },
+   post_height = {
+      method = "post",
+      path = { "height" },
+      params = {}
+   },
+   post_partial_solution = {
+      method = "post",
+      path = { "partial_solution" },
+      params = {}
+   },
+   post_peers = {
+      method = "post",
+      path = { "peers" },
+      params = {}
+   },
+   post_tx = {
+      method = "post",
+      path = { "tx" },
+      params = {}
+   },
+   post_tx2 = {
+      method = "post",
+      path = { "tx2" },
+      params = {}
+   },
+   post_unsigned_tx = {
+      method = "post",
+      path = { "unsigned_tx" },
+      params = {}
+   },
+   post_vdf = {
+      method = "post",
+      path = { "vdf" },
+      headers = default_headers,
+      params = {}
+   },
+   post_wallet = {
+      method = "post",
+      path = { "wallet" },
+      headers = default_headers,
+      params = {}
+   },
+
+   -- options method
+   options_block = {
+      method = "option",
+      path = { "block" }
+   },
+   options_peer = {
+      method = "option",
+      path = { "peer" }
+   },
+   options_tx = {
+      method = "tx",
+      path = { "tx" }
+   }
 }
 
 local default_scan = {
@@ -321,7 +455,7 @@ end
 -- method.
 is_gateway = function(host, port)
    local output = http_request(host, port, "root")
-   
+
    if output.http_status ~= 200 then
       return false
    end
@@ -335,7 +469,7 @@ is_gateway = function(host, port)
       return false
    end
    if string.find(output.parsed.network, "^arweave") then
-      return true
+      return output
    end
 end
 
@@ -344,10 +478,23 @@ action = function(host, port)
    if is_gateway(host, port) then
       local output = stdnse.output_table()
       local result
+
+      -- set more information about the service
+      port.version.name = "arweave"
+      port.version.product = output.network
+      port.version.version = output.version
+      port.version.extrainfo = {
+         release = output.release,
+         peers = output.peers,
+         height = output.heigh
+      }
+      nmap.set_port_version(host, port)
+
       for key, path_id in pairs(default_scan) do
          result = http_request(host, port, path_id)
          output[path_id] = result
       end
+
       return output
    end
 end
