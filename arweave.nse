@@ -19,7 +19,10 @@
 -- -------------------------------------------------------------------
 --
 -- Usage: nmap -p 1984 --script=arweave.nse
--- 
+--
+-- https://ar-io.dev/api-docs/
+-- https://docs.ar.io/gateways/ar-io-node/admin/admin-api.html#overview
+--
 -- -------------------------------------------------------------------
 --
 -- @output
@@ -93,6 +96,7 @@ local json = require "json"
 local comm = require "comm"
 local shortport = require "shortport"
 local stdnse = require "stdnse"
+local rand = require "rand"
 
 author = "Mathieu Kerjouan"
 license = "ISC-OpenBSD"
@@ -103,80 +107,247 @@ categories = {"default", "discovery", "safe"}
 portrule = shortport.port_or_service(1984, "arweave", "tcp", "open")
 
 local api = {
-   get = {
-      block_index = "/block_index",
-      block_index2 = "/block_index2",
-      chunk = "/chunk",
-      chunk2 = "/chunk2",
-      chunk_proof = "/chunk_proof",
-      coordinated_mining_partition_table = "/coordinated_mining/partition_table",
-      coordinated_mining_state = "/coordinated_mining/state",
-      current_block = "/current_block",
-      data_sync_record = "/data_sync_record",
-      default = "/",
-      height = "/height",
-      info = "/info",
-      info = "/info",
-      jobs = "/jobs",
-      peers = "/peers",
-      queue = "/queue",
-      rates = "/rates",
-      recent_hash_list_diff = "/recent_hash_list_diff",
-      sync_buckets = "/sync_buckets",
-      time = "/time",
-      total_supply = "/total_supply",
-      tx_anchor = "/tx_anchor",
-      tx_pending = "/tx/pending",
-      vdf = "/vdf",
-      vdf2 = "/vdf2",
-      vdf2_previous_session = "/vdf2/previous_session",
-      vdf2_session = "/vdf2/session",
-      vdf_previous_session = "/vdf/previous_session",
-      vdf_session = "/vdf/session",
-      wallet = "wallet_list"
+   admin_debug = {
+      method = "get",
+      path = { "ar-io", "admin", "debug" }
+   },
+   block_index = {
+      method = "get",
+      path = { "block_index" }
+   },
+   block_index2 = {
+      method = "get",
+      path = { "block_index2" }
+   },
+   chunk = {
+      method = "get",
+      path = { "chunk" }
+   },
+   chunk2 = {
+      method = "get",
+      path = { "chunk2" }
+   },
+   chunk_proof = {
+      method = "get",
+      path = { "chunk_proof" }
+   },
+   coordinated_mining_partition_table = {
+      method = "get",
+      path = { "coordinated_mining", "partition_table" }
+   },
+   coordinated_mining_state = {
+      method = "get",
+      path = { "coordinated_mining", "state" }
+   },
+   current_block = {
+      method = "get",
+      path = { "current_block" }
+   },
+   data_sync_record = {
+      method = "get",
+      path = {"data_sync_record" }
+   },
+   root = {
+      method = "get",
+      path = {}
+   },
+   height = {
+      method = "get",
+      path = { "height" }
+   },
+   info = {
+      method = "get",
+      path = { "info" }
+   },
+   jobs = {
+      method = "get",
+      path = { "jobs" }
+   },
+   peers = {
+      method = "get",
+      path = { "peers" }
+   },
+   queue = {
+      method = "get",
+      path = { "queue" }
+   },
+   rates = {
+      method = "get",
+      path = { "rates" }
+   },
+   recent_hash_list_diff = {
+      method = "get",
+      path = { "recent_hash_list_diff" }
+   },
+   sync_buckets = {
+      method = "get",
+      path = { "sync_buckets" }
+   },
+   time = {
+      method = "get",
+      path = { "time" }
+   },
+   total_supply = {
+      method = "get",
+      path = { "total_supply" }
+   },
+   tx_anchor = {
+      method = "get",
+      path = { "tx_anchor" }
+   },
+   tx_pending = {
+      method = "get",
+      path = { "tx", "pending" }
+   },
+   vdf = {
+      method = "get",
+      path = { "vdf" }
+   },
+   vdf2 = {
+      method = "get",
+      path = { "vdf2" }
+   },
+   vdf2_previous_session = {
+      method = "get",
+      path = { "vdf2", "previous_session" }
+   },
+   vdf2_session = {
+      method = "get",
+      path = { "vdf2", "session" }
+   },
+   vdf_previous_session = {
+      method = "get",
+      path = { "vdf", "previous_session" }
+   },
+   vdf_session = {
+      method = "get",
+      path = { "vdf", "session" }
+   },
+   wallet = {
+      method = "get",
+      path = { "wallet_list" }
    }
+
+   -- price_size = {
+   --    path = {"price", { name = "size" } }
+   -- },
+   -- price_size_target = {
+   --    path = { "price", { name = "size" }, "target" }
+   -- },
+   -- wallet_balance = {
+   --    path = { "wallet", { name = "address" }, "balance" }
+   -- },
+   -- wallet_last_tx = {
+   --    path = { "wallet" , { name = "address" }, "last_tx" }
+   -- },
+   -- block_height = {
+   --    path = { "block", "height", { name = "height" } }
+   -- },
+   -- block_hash = {
+   --    path = { "block", "hash", { name = "hash" } }
+   -- },
+   -- tx = {
+   --    path = { "tx", { name = "tx_id" } }
+   -- },
+   -- tx_offset = {
+   --    path = { "tx", { name = "tx_id" }, "offset" }
+   -- },
+   -- tx_status = {
+   --    path = { "tx", { name = "tx_id" } , "status" }
+   -- },
+   -- chunks = {
+   --    path = { "chunk", { name = "offset" } }
+   -- }
 }
 
 local default_scan = {
-   "default", "info", "peers", "time", "rates"
+   "info", "peers", "time", "rates"
 }
 
 -- full scan generated with the key present in api data structure
 local full_scan = function()
    local buffer = {}
-   for key, value in pairs(api["get"]) do
+   for key, value in pairs(api) do
       table.insert(buffer, key)
    end
    return buffer
 end
 
--- wrapper around http request for get
-http_get = function(host, port, id)
-   local output = stdnse.output_table()   
-   local path = api["get"][id]
-   local response = http.get(host, port, path)
-   if (not(response) or response.status ~= 200) then
-      return
+-- convert a table made of string and table into a path
+http_path = function(list, params)
+   local path = {}
+   for key, value in ipairs(list) do
+      if type(value) == "string" then
+         table.insert(path, value)
+      end
+      if type(value) == "table" then
+         local name = value["name"]
+         local param = params[name]
+         table.insert(path, param)
+      end
    end
-   
+   return "/" .. table.concat(path, "/")
+end
+
+-- wrapper around http request for get
+http_request = function(host, port, path_id, params)
+   local output = stdnse.output_table()
+   local method = api[path_id]["method"]
+   local path = http_path(api[path_id]["path"])
+   local response
+
+   if method ~= "get" then
+      error(path_id .. ": unsupported http method (" .. method .. ")")
+   end
+   response = http.get(host, port, path)
+
+   if (not(response) or response.status ~= 200) then
+      return nil
+   end
+
    local status, parsed = json.parse(response.body)
-   
+
+   output.http_path_id = path_id
    output.http_path = path
-   output.http_method = "get"
+   output.http_method = method
    output.http_status = response.status
    output.parsed = parsed
 
    return output
 end
 
-action = function(host, port)
-   local output = stdnse.output_table()
-   local result
+-- returns true if it's a gateway or a miner, else false. To do that,
+-- this function analyze the JSON object returned by / using get
+-- method.
+is_gateway = function(host, port)
+   local output = http_request(host, port, "root")
    
-   for key, path in pairs(default_scan) do
-      result = http_get(host, port, path)
-      output[path] = result
+   if output.http_status ~= 200 then
+      return false
    end
-   
-   return output
+   if not(output.parsed.version) then
+      return false
+   end
+   if not(output.parsed.release) then
+      return false
+   end
+   if not(output.parsed.network) then
+      return false
+   end
+   if string.find(output.parsed.network, "^arweave") then
+      return true
+   end
+end
+
+-- entry point
+action = function(host, port)
+   if is_gateway(host, port) then
+      local output = stdnse.output_table()
+      local result
+      for key, path_id in pairs(default_scan) do
+         result = http_request(host, port, path_id)
+         output[path_id] = result
+      end
+      return output
+   end
 end
