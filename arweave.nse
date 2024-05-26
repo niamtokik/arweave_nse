@@ -514,7 +514,7 @@ http_request = function(host, port, path_id, params)
          output.headers = response.header
          return output
       end
-      
+
       -- output headers
       output.http_status = response.status
       output.headers = response.header
@@ -527,23 +527,23 @@ http_request = function(host, port, path_id, params)
       else
          output.body = response.rawbody
       end
-      
+
       return output
    end
 
    -- head method, returns only headers
    if method == "head" then
       response = http.head(host, port, path)
-      
+
       if not(response) then
          return nil
       end
-      
+
       -- output headers
       output.headers = response.header
       return output
    end
-   
+
    if method ~= "get" or method ~= "head" then
       error(path_id .. ": unsupported http method (" .. method .. ")")
    end
@@ -580,7 +580,7 @@ action = function(host, port)
 
       -- get arweave.scan variable, set to "default" by default
       local scan = stdnse.get_script_args("arweave.scan") or "default"
-      
+
       -- set more information about the service
       port.version.name = "arweave"
       port.version.product = output.network
@@ -598,7 +598,7 @@ action = function(host, port)
             output[key] = result
          end
       end
-      
+
       return output
    end
 end
