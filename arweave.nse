@@ -90,7 +90,15 @@
 --
 -- Nmap done: 1 IP address (1 host up) scanned in 2.27 seconds
 --
+-- @TODO add HTTP POST method support
+-- @TODO add HTTP OPTIONS method support
+-- @TODO add script argument support
+-- @TODO add fuzzer
+-- @TODO add application/etf support
+-- @TODO randomize api table before scanning
+--
 ----------------------------------------------------------------------
+local nmap = require "nmap"
 local http = require "http"
 local json = require "json"
 local comm = require "comm"
@@ -106,273 +114,330 @@ Idendify and collect information about arweave gateways and miners.
 categories = {"default", "discovery", "safe", "version"}
 portrule = shortport.port_or_service(1984, "arweave", "tcp", "open")
 
-local api = {
-   admin_debug = {
-      method = "get",
-      path = { "ar-io", "admin", "debug" }
-   },
-   block_index = {
-      method = "get",
-      path = { "block_index" }
-   },
-   block_index2 = {
-      method = "get",
-      path = { "block_index2" }
-   },
-   chunk = {
-      method = "get",
-      path = { "chunk" }
-   },
-   chunk2 = {
-      method = "get",
-      path = { "chunk2" }
-   },
-   chunk_proof = {
-      method = "get",
-      path = { "chunk_proof" }
-   },
-   coordinated_mining_partition_table = {
-      method = "get",
-      path = { "coordinated_mining", "partition_table" }
-   },
-   coordinated_mining_state = {
-      method = "get",
-      path = { "coordinated_mining", "state" }
-   },
-   current_block = {
-      method = "get",
-      path = { "current_block" }
-   },
-   data_sync_record = {
-      method = "get",
-      path = {"data_sync_record" }
-   },
-   root = {
-      method = "get",
-      path = {}
-   },
-   height = {
-      method = "get",
-      path = { "height" }
-   },
-   info = {
-      method = "get",
-      path = { "info" }
-   },
-   jobs = {
-      method = "get",
-      path = { "jobs" }
-   },
-   peers = {
-      method = "get",
-      path = { "peers" }
-   },
-   queue = {
-      method = "get",
-      path = { "queue" }
-   },
-   rates = {
-      method = "get",
-      path = { "rates" }
-   },
-   recent_hash_list_diff = {
-      method = "get",
-      path = { "recent_hash_list_diff" }
-   },
-   sync_buckets = {
-      method = "get",
-      path = { "sync_buckets" }
-   },
-   time = {
-      method = "get",
-      path = { "time" }
-   },
-   total_supply = {
-      method = "get",
-      path = { "total_supply" }
-   },
-   tx_anchor = {
-      method = "get",
-      path = { "tx_anchor" }
-   },
-   tx_pending = {
-      method = "get",
-      path = { "tx", "pending" }
-   },
-   vdf = {
-      method = "get",
-      path = { "vdf" }
-   },
-   vdf2 = {
-      method = "get",
-      path = { "vdf2" }
-   },
-   vdf2_previous_session = {
-      method = "get",
-      path = { "vdf2", "previous_session" }
-   },
-   vdf2_session = {
-      method = "get",
-      path = { "vdf2", "session" }
-   },
-   vdf_previous_session = {
-      method = "get",
-      path = { "vdf", "previous_session" }
-   },
-   vdf_session = {
-      method = "get",
-      path = { "vdf", "session" }
-   },
-   wallet = {
-      method = "get",
-      path = { "wallet_list" }
-   }
-}
-
 local default_headers = {
    {"content-type", "application/json"}
 }
 
--- not supported yet
-local api_params = {
+local api = {
+   -- get methods without parameters
+   admin_debug = {
+      scan = "default",
+      method = "get",
+      path = { "ar-io", "admin", "debug" }
+   },
+   block_index = {
+      scan = "default",
+      method = "get",
+      path = { "block_index" }
+   },
+   block_index2 = {
+      scan = "default",
+      method = "get",
+      path = { "block_index2" }
+   },
+   chunk = {
+      scan = "default",
+      method = "get",
+      path = { "chunk" }
+   },
+   chunk2 = {
+      scan = "default",
+      method = "get",
+      path = { "chunk2" }
+   },
+   chunk_proof = {
+      scan = "default",
+      method = "get",
+      path = { "chunk_proof" }
+   },
+   coordinated_mining_partition_table = {
+      scan = "full",
+      method = "get",
+      path = { "coordinated_mining", "partition_table" }
+   },
+   coordinated_mining_state = {
+      scan = "full",
+      method = "get",
+      path = { "coordinated_mining", "state" }
+   },
+   current_block = {
+      scan = "full",
+      method = "get",
+      path = { "current_block" }
+   },
+   data_sync_record = {
+      scan = "default",
+      method = "get",
+      path = { "data_sync_record" }
+   },
+   root = {
+      scan = "init",
+      method = "get",
+      path = {}
+   },
+   height = {
+      scan = "default",
+      method = "get",
+      path = { "height" }
+   },
+   info = {
+      scan = "default",
+      method = "get",
+      path = { "info" }
+   },
+   jobs = {
+      scan = "default",
+      method = "get",
+      path = { "jobs" }
+   },
+   peers = {
+      scan = "default",
+      method = "get",
+      path = { "peers" }
+   },
+   queue = {
+      scan = "default",
+      method = "get",
+      path = { "queue" }
+   },
+   rates = {
+      scan = "default",
+      method = "get",
+      path = { "rates" }
+   },
+   recent_hash_list_diff = {
+      scan = "default",
+      method = "get",
+      path = { "recent_hash_list_diff" }
+   },
+   sync_buckets = {
+      scan = "default",
+      method = "get",
+      path = { "sync_buckets" }
+   },
+   time = {
+      scan = "default",
+      method = "get",
+      path = { "time" }
+   },
+   total_supply = {
+      scan = "default",
+      method = "get",
+      path = { "total_supply" }
+   },
+   tx_anchor = {
+      scan = "default",
+      method = "get",
+      path = { "tx_anchor" }
+   },
+   tx_pending = {
+      scan = "default",
+      method = "get",
+      path = { "tx", "pending" }
+   },
+   vdf = {
+      scan = "default",
+      method = "get",
+      path = { "vdf" }
+   },
+   vdf2 = {
+      scan = "default",
+      method = "get",
+      path = { "vdf2" }
+   },
+   vdf2_previous_session = {
+      scan = "default",
+      method = "get",
+      path = { "vdf2", "previous_session" }
+   },
+   vdf2_session = {
+      scan = "default",
+      method = "get",
+      path = { "vdf2", "session" }
+   },
+   vdf_previous_session = {
+      scan = "default",
+      method = "get",
+      path = { "vdf", "previous_session" }
+   },
+   vdf_session = {
+      scan = "default",
+      method = "get",
+      path = { "vdf", "session" }
+   },
+   wallet = {
+      scan = "default",
+      method = "get",
+      path = { "wallet_list" }
+   },
 
    -- head methods
    head_root = {
+      scan = "full",
       method = "head",
       path = {}
    },
    head_info = {
+      scan = "full",
       method = "head",
       path = { "info" }
    },
 
-   -- get methods
+   -- get methods with arguments in path
    price_size = {
+      scan = "full",
       method = "get",
       path = {"price", { name = "size" } }
    },
    price_size_target = {
+      scan = "full",
       method = "get",
       path = { "price", { name = "size" }, "target" }
    },
    wallet_balance = {
+      scan = "full",
       method = "get",
       path = { "wallet", { name = "address" }, "balance" }
    },
    wallet_last_tx = {
+      scan = "full",
       method = "get",
       path = { "wallet" , { name = "address" }, "last_tx" }
    },
    block_height = {
+      scan = "full",
       method = "get",
       path = { "block", "height", { name = "height" } }
    },
    block_hash = {
+      scan = "full",
       method = "get",
       path = { "block", "hash", { name = "hash" } }
    },
    tx = {
+      scan = "full",
       method = "get",
       path = { "tx", { name = "tx_id" } }
    },
    tx_offset = {
+      scan = "full",
       method = "get",
       path = { "tx", { name = "tx_id" }, "offset" }
    },
    tx_status = {
+      scan = "full",
       method = "get",
       path = { "tx", { name = "tx_id" } , "status" }
    },
    chunks = {
+      scan = "full",
       method = "get",
       path = { "chunk", { name = "offset" } }
    },
    admin_queue_tx = {
+      scan = "full",
       method = "post",
       path = { "ar-io", "admin", "queue-tx" }
    },
    admin_block_data = {
+      scan = "full",
       method = "put",
       path = { "ar-io", "admin", "block-data" }
    },
    get_farcaster_frame_tx = {
+      scan = "full",
       method = "get",
       path = { "local", "farcaster", "frame", { name = "tx_id" } }
    },
 
-   -- post methods
+   -- post methods with body and/or parameters in path
    post_farcaster_frame_tx = {
+      scan = "fuzzer",
       method = "post",
       path = { "local", "farcaster", "frame", { name = "tx_id" } },
       params = {}
    },
    post_block2 = {
+      scan = "fuzzer",
       method = "post",
       path = { "block2" },
       params = {}
    },
    post_block_announcement = {
+      scan = "fuzzer",
       method = "post",
       path = { "block_announcement" },
       params = {}
    },
    post_block = {
+      scan = "fuzzer",
       method = "post",
       path = { "block" },
       params = {}
    },
    post_chunk = {
+      scan = "fuzzer",
       method = "post",
       path = { "chunk" },
       params = {}
    },
    post_coordinated_mining_h1 = {
+      scan = "fuzzer",
       method = "post",
       path = { "coordinated_mining", "h1" },
       params = {}
    },
    post_coordinated_mining_h2 = {
+      scan = "fuzzer",
       method = "post",
       path = { "coordinated_mining", "h2" },
       params = {}
    },
    post_height = {
+      scan = "fuzzer",
       method = "post",
       path = { "height" },
       params = {}
    },
    post_partial_solution = {
+      scan = "fuzzer",
       method = "post",
       path = { "partial_solution" },
       params = {}
    },
    post_peers = {
+      scan = "fuzzer",
       method = "post",
       path = { "peers" },
       params = {}
    },
    post_tx = {
+      scan = "fuzzer",
       method = "post",
       path = { "tx" },
       params = {}
    },
    post_tx2 = {
+      scan = "fuzzer",
       method = "post",
       path = { "tx2" },
       params = {}
    },
    post_unsigned_tx = {
+      scan = "fuzzer",
       method = "post",
       path = { "unsigned_tx" },
       params = {}
    },
    post_vdf = {
+      scan = "fuzzer",
       method = "post",
       path = { "vdf" },
       headers = default_headers,
       params = {}
    },
    post_wallet = {
+      scan = "fuzzer",
       method = "post",
       path = { "wallet" },
       headers = default_headers,
@@ -381,21 +446,20 @@ local api_params = {
 
    -- options method
    options_block = {
+      scan = "full",
       method = "option",
       path = { "block" }
    },
    options_peer = {
+      scan = "full",
       method = "option",
       path = { "peer" }
    },
    options_tx = {
+      scan = "full",
       method = "tx",
       path = { "tx" }
    }
-}
-
-local default_scan = {
-   "info", "peers", "time", "rates"
 }
 
 -- full scan generated with the key present in api data structure
@@ -430,24 +494,59 @@ http_request = function(host, port, path_id, params)
    local path = http_path(api[path_id]["path"])
    local response
 
-   if method ~= "get" then
-      error(path_id .. ": unsupported http method (" .. method .. ")")
-   end
-   response = http.get(host, port, path)
-
-   if (not(response) or response.status ~= 200) then
-      return nil
-   end
-
-   local status, parsed = json.parse(response.body)
-
+   -- general information regarding request
    output.http_path_id = path_id
    output.http_path = path
    output.http_method = method
-   output.http_status = response.status
-   output.parsed = parsed
 
-   return output
+   -- get method, assume the content returned is json by default.
+   if method == "get" then
+      response = http.get(host, port, path)
+
+      -- if no response returns nil
+      if not(response) then
+         return nil
+      end
+
+      -- if response is not 200 (error?) returns only headers
+      if response.status ~= 200 then
+         output.http_status = response.status
+         output.headers = response.header
+         return output
+      end
+      
+      -- output headers
+      output.http_status = response.status
+      output.headers = response.header
+
+      -- we assume the response is correct and returned http/200, then
+      -- body is probably a json.
+      local status, parsed = json.parse(response.body)
+      if status then
+         output.body = parsed
+      else
+         output.body = response.rawbody
+      end
+      
+      return output
+   end
+
+   -- head method, returns only headers
+   if method == "head" then
+      response = http.head(host, port, path)
+      
+      if not(response) then
+         return nil
+      end
+      
+      -- output headers
+      output.headers = response.header
+      return output
+   end
+   
+   if method ~= "get" or method ~= "head" then
+      error(path_id .. ": unsupported http method (" .. method .. ")")
+   end
 end
 
 -- returns true if it's a gateway or a miner, else false. To do that,
@@ -459,16 +558,16 @@ is_gateway = function(host, port)
    if output.http_status ~= 200 then
       return false
    end
-   if not(output.parsed.version) then
+   if not(output.body.version) then
       return false
    end
-   if not(output.parsed.release) then
+   if not(output.body.release) then
       return false
    end
-   if not(output.parsed.network) then
+   if not(output.body.network) then
       return false
    end
-   if string.find(output.parsed.network, "^arweave") then
+   if string.find(output.body.network, "^arweave") then
       return output
    end
 end
@@ -479,6 +578,9 @@ action = function(host, port)
       local output = stdnse.output_table()
       local result
 
+      -- get arweave.scan variable, set to "default" by default
+      local scan = stdnse.get_script_args("arweave.scan") or "default"
+      
       -- set more information about the service
       port.version.name = "arweave"
       port.version.product = output.network
@@ -490,11 +592,13 @@ action = function(host, port)
       }
       nmap.set_port_version(host, port)
 
-      for key, path_id in pairs(default_scan) do
-         result = http_request(host, port, path_id)
-         output[path_id] = result
+      for key, value in pairs(api) do
+         if value["scan"] == scan then
+            result = http_request(host, port, key)
+            output[key] = result
+         end
       end
-
+      
       return output
    end
 end
