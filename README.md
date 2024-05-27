@@ -35,7 +35,8 @@ flag.
  - [x] HTTP HEAD method
  - [x] HTTP GET method with path parameters
  - [x] HTTP POST method with path parameters and configured body
- - [ ] HTTP OPTIONS method
+ - [x] HTTP PUT method with path parameters and configured body
+ - [ ] ~~HTTP OPTIONS method~~ (not supported by default nmap library)
  - [ ] Randomized Scanner
  - [ ] Add arguments supports:
    - [ ] `arweave.http_header_content_type="application/json"`

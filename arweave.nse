@@ -90,8 +90,6 @@
 --
 -- Nmap done: 1 IP address (1 host up) scanned in 2.27 seconds
 --
--- @TODO add HTTP POST method support
--- @TODO add HTTP OPTIONS method support
 -- @TODO add fuzzer
 -- @TODO add application/etf support
 -- @TODO randomize api table before scanning
@@ -581,28 +579,28 @@ local api = {
       scan = "full",
       method = "post",
       path = { "wallet" }
-   },
+   }
 
    -- wip: arweave.options_block.fuzzing = true | false
-   options_block = {
-      scan = "full",
-      method = "option",
-      path = { "block" }
-   },
+   -- options_block = {
+   --    scan = "full",
+   --    method = "option",
+   --    path = { "block" }
+   -- },
 
    -- wip: arweave.options_peers.fuzzing = true | false
-   options_peer = {
-      scan = "full",
-      method = "option",
-      path = { "peer" }
-   },
+   -- options_peer = {
+   --    scan = "full",
+   --    method = "option",
+   --    path = { "peer" }
+   -- },
 
    -- wip: arweave.options_tx.fuzzing = true | false
-   options_tx = {
-      scan = "full",
-      method = "tx",
-      path = { "tx" }
-   }
+   -- options_tx = {
+   --    scan = "full",
+   --    method = "tx",
+   --    path = { "tx" }
+   -- }
 }
 
 ----------------------------------------------------------------------
@@ -739,6 +737,34 @@ http_request = function(host, port, path_id)
       local body_arg_path = create_arg_path(path_id, "body")
       local body = stdnse.get_script_args(body_arg_path) or ""
       response = http.post(host, port, path, {}, {}, body)
+
+      if not(response) then
+         return nil
+      end
+
+      -- if response is not 200 (error?) returns only headers
+      if response.status ~= 200 then
+         output.http_status = response.status
+         output.headers = response.header
+         return output
+      end
+
+      -- output headers and body
+      output.http_status = response.status
+      output.headers = response.header
+      output.body = response.rawbody
+      return output
+   end
+
+   --------------------------------------------------------------------
+   -- post method, disabled for the moment
+   --------------------------------------------------------------------
+   if method == "put" then
+      -- we retrieve the body from arguments. By default, the body is
+      -- empty
+      local body_arg_path = create_arg_path(path_id, "body")
+      local body = stdnse.get_script_args(body_arg_path) or ""
+      response = http.put(host, port, path, {}, {}, body)
 
       if not(response) then
          return nil
