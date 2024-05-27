@@ -34,7 +34,7 @@ flag.
  - [x] HTTP GET method support without parameters
  - [x] HTTP HEAD method
  - [x] HTTP GET method with path parameters
- - [ ] HTTP POST method with path parameters and configured body
+ - [x] HTTP POST method with path parameters and configured body
  - [ ] HTTP OPTIONS method
  - [ ] Randomized Scanner
  - [ ] Add arguments supports:
@@ -46,6 +46,35 @@ flag.
    - [x] `arweave.scan_only=api_id`: scan only one path (bypass scan mode)
    - [x] `arweave.scan_filter=.*`: filter scanned parse (bypass scan mode)
    - [ ] `arweave.http_header_authentication`: add bearer support
+ - [x] Custom options for api
+   - [x] `arweave.get_price_size.size`
+   - [x] `arweave.get_price_size_target.size`
+   - [x] `arweave.get_wallet_balance.address`
+   - [x] `arweave.get_wallet_last_tx.address`
+   - [x] `arweave.get_block_height.height`
+   - [x] `arweave.get_block_hash.hash`
+   - [x] `arweave.get_tx.tx_id`
+   - [x] `arweave.get_tx_offset.tx_id`
+   - [x] `arweave.get_tx_state.tx_id`
+   - [x] `arweave.get_chunks.offset`
+   - [x] `arweave.post_admin_queue_tx.body`
+   - [x] `arweave.put_admin_block_data.body`
+   - [x] `arweave.get_farcaster_frame_tx.tx_id`
+   - [x] `arweave.post_farcaster_frame_tx.tx_id`
+   - [x] `arweave.post_block2.body`
+   - [x] `arweave.post_block_announcement.body`
+   - [x] `arweave.post_block.body`
+   - [x] `arweave.post_block.body`
+   - [x] `arweave.post_coordinated_mining_h1.body`
+   - [x] `arweave.post_coordinated_mining_h2.body`
+   - [x] `arweave.post_height.body`
+   - [x] `arweave.post_partial_solution.body`
+   - [x] `arweave.post_peers.body`
+   - [x] `arweave.post_tx.body`
+   - [x] `arweave.post_tx2.body`
+   - [x] `arweave.post_unsigned_tx.body`
+   - [x] `arweave.post_vdf.body`
+   - [x] `arweave.post_wallet.body`
  - [ ] Fuzzer:
    - [ ] Simple ETF parser
    - [ ] Simple ETF serializer

@@ -350,72 +350,102 @@ local api = {
 
    -- ok: arweave.get_price_size.size = 123
    get_price_size = {
-      scan = "full",
+      scan = "fuzzer",
       method = "get",
-      path = { "price", { arg_name = "size" } }
+      path = { "price", { arg_name = "size" } },
+      path_default = {
+         size = ""
+      }
    },
 
    -- ok: arweave.get_price_size_target.size = 123
    get_price_size_target = {
-      scan = "full",
+      scan = "fuzzer",
       method = "get",
-      path = { "price", { arg_name = "size" }, "target" }
+      path = { "price", { arg_name = "size" }, "target" },
+      path_default = {
+         size = ""
+      }
    },
 
    -- ok: arweave.get_wallet_balance.address = "address"
    get_wallet_balance = {
-      scan = "full",
+      scan = "fuzzer",
       method = "get",
-      path = { "wallet", { arg_name = "address" }, "balance" }
+      path = { "wallet", { arg_name = "address" }, "balance" },
+      path_default = {
+         address = ""
+      }
    },
 
    -- ok: arweave.get_wallet_last_tx.address = "address"
    get_wallet_last_tx = {
-      scan = "full",
+      scan = "fuzzer",
       method = "get",
-      path = { "wallet" , { arg_name = "address" }, "last_tx" }
+      path = { "wallet" , { arg_name = "address" }, "last_tx" },
+      path_default = {
+         address = ""
+      }
    },
 
    -- ok: arweave.get_block_height.height = 123
    get_block_height = {
-      scan = "full",
+      scan = "fuzzer",
       method = "get",
-      path = { "block", "height", { arg_name = "height" } }
+      path = { "block", "height", { arg_name = "height" } },
+      path_default = {
+         height = 0
+      }
    },
 
    -- ok: arweave.get_block_hash.hash = "hash"
    get_block_hash = {
-      scan = "full",
+      scan = "fuzzer",
       method = "get",
-      path = { "block", "hash", { arg_name = "hash" } }
+      path = { "block", "hash", { arg_name = "hash" } },
+      path_default = {
+         hash = ""
+      }
    },
 
    -- ok: arweave.get_tx.tx_id = "tx_id"
    get_tx = {
-      scan = "full",
+      scan = "fuzzer",
       method = "get",
-      path = { "tx", { arg_name = "tx_id" } }
+      path = { "tx", { arg_name = "tx_id" } },
+      path_default = {
+         tx_id = ""
+      }
    },
 
    -- ok: arweave.get_tx_offset.tx_id = "tx_id"
    get_tx_offset = {
-      scan = "full",
+      scan = "fuzzer",
       method = "get",
-      path = { "tx", { arg_name = "tx_id" }, "offset" }
+      path = { "tx", { arg_name = "tx_id" }, "offset" },
+      path_default = {
+         tx_id = ""
+      }
    },
 
    -- ok: arweave.get_tx_state.tx_id = "tx_id"
    get_tx_status = {
-      scan = "full",
+      scan = "fuzzer",
       method = "get",
-      path = { "tx", { arg_name = "tx_id" } , "status" }
+      path = { "tx", { arg_name = "tx_id" } , "status" },
+      path_default = {
+         tx_id = ""
+      }
    },
 
    -- ok: arweave.get_chunks.offset = "offset"
    get_chunks = {
-      scan = "full",
+      scan = "fuzzer",
       method = "get",
-      path = { "chunk", { arg_name = "offset" } }
+      path = { "chunk", { arg_name = "offset" } },
+      path_default = {
+         offset = ""
+      }
    },
 
    -- ok: arweave.post_admin_queue_tx.body = ""
@@ -434,9 +464,12 @@ local api = {
 
    -- ok: arweave.get_farcaster_frame_tx.tx_id = ""
    get_farcaster_frame_tx = {
-      scan = "full",
+      scan = "fuzzer",
       method = "get",
-      path = { "local", "farcaster", "frame", { arg_name = "tx_id" } }
+      path = { "local", "farcaster", "frame", { arg_name = "tx_id" } },
+      path_default = {
+         tx_id = ""
+      }
    },
 
    -- ok: arweave.post_farcaster_frame_tx.tx_id = ""
@@ -445,117 +478,107 @@ local api = {
       scan = "fuzzer",
       method = "post",
       path = { "local", "farcaster", "frame", { arg_name = "tx_id" } },
-      params = {}
+      path_default = {
+         tx_id = ""
+      }
    },
 
-   -- wip: arweave.post_block2.body = ""
+   -- ok: arweave.post_block2.body = ""
    post_post_block2 = {
-      scan = "fuzzer",
+      scan = "full",
       method = "post",
       path = { "block2" },
-      params = {}
    },
 
-   -- wip: arweave.post_block_announcement.body = ""
+   -- ok: arweave.post_block_announcement.body = ""
    post_block_announcement = {
-      scan = "fuzzer",
+      scan = "full",
       method = "post",
       path = { "block_announcement" },
-      params = {}
    },
 
-   -- wip: arweave.post_block.body = ""
+   -- ok: arweave.post_block.body = ""
    post_block = {
-      scan = "fuzzer",
+      scan = "full",
       method = "post",
       path = { "block" },
-      params = {}
    },
 
-   -- wip: arweave.post_block.body = ""
+   -- ok: arweave.post_block.body = ""
    post_chunk = {
-      scan = "fuzzer",
+      scan = "full",
       method = "post",
       path = { "chunk" },
-      params = {}
    },
 
-   -- wip: arweave.post_coordinated_mining_h1.body = ""
+   -- ok: arweave.post_coordinated_mining_h1.body = ""
    post_coordinated_mining_h1 = {
-      scan = "fuzzer",
+      scan = "full",
       method = "post",
       path = { "coordinated_mining", "h1" },
-      params = {}
    },
 
-   -- wip: arweave.post_coordinated_mining_h2.body = ""
+   -- ok: arweave.post_coordinated_mining_h2.body = ""
    post_coordinated_mining_h2 = {
-      scan = "fuzzer",
+      scan = "full",
       method = "post",
       path = { "coordinated_mining", "h2" },
-      params = {}
    },
 
-   -- wip: arweave.post_height.body = ""
+   -- ok: arweave.post_height.body = ""
    post_height = {
-      scan = "fuzzer",
+      scan = "full",
       method = "post",
       path = { "height" },
-      params = {}
    },
 
-   -- wip: arweave.post_partial_solution.body = ""
+   -- ok: arweave.post_partial_solution.body = ""
    post_partial_solution = {
-      scan = "fuzzer",
+      scan = "full",
       method = "post",
-      path = { "partial_solution" },
-      params = {}
+      path = { "partial_solution" }
    },
 
-   -- wip: arweave.post_peers.body = ""
+   -- ok: arweave.post_peers.body = ""
    post_peers = {
-      scan = "fuzzer",
+      scan = "full",
       method = "post",
       path = { "peers" },
-      params = {}
    },
 
-   -- wip: arweave.post_tx.body = ""
+   -- ok: arweave.post_tx.body = ""
    post_tx = {
-      scan = "fuzzer",
+      scan = "full",
       method = "post",
-      path = { "tx" },
-      params = {}
+      path = { "tx" }
    },
 
-   -- wip: arweave.post_tx2.body = ""
+   -- ok: arweave.post_tx2.body = ""
    post_tx2 = {
-      scan = "fuzzer",
+      scan = "full",
       method = "post",
-      path = { "tx2" },
-      params = {}
+      path = { "tx2" }
    },
 
-   -- wip: arweave.post_unsigned_tx.body = ""
+   -- ok: arweave.post_unsigned_tx.body = ""
    post_unsigned_tx = {
-      scan = "fuzzer",
+      scan = "full",
       method = "post",
-      path = { "unsigned_tx" },
-      params = {}
+      path = { "unsigned_tx" }
    },
 
-   -- wip: arweave.post_vdf.body = ""
+   -- ok: arweave.post_vdf.body = ""
    -- wip: arweave.post_vdf.fuzzing = true | false
    post_vdf = {
-      scan = "fuzzer",
+      scan = "full",
       method = "post",
       path = { "vdf" }
    },
 
-   -- wip: arweave.post_wallet.body = ""
+   -- ok: arweave.post_wallet.body = ""
    -- wip: arweave.post_wallet.fuzzing = true | false
    post_wallet = {
-      scan = "fuzzer",
+      scan = "full",
       method = "post",
       path = { "wallet" }
    },
@@ -613,12 +636,16 @@ http_path = function(path_id)
       if type(value) == "table" then
          local name = value["arg_name"]
 
+         -- try to find the default argument used, in the end it could
+         -- be a random value generated based on some specification.
+         local default_arg = api[path_id]["path_default"][name]
+
          -- we create nmap argument path
-         local arg_key = {"arweave", path_id, name}
-         local arg_path = table.concat(arg_key, ".")
+         local arg_path = create_arg_path(path_id, name)
 
          -- we fetch argument or crash
          local arg = stdnse.get_script_args(arg_path)
+            or default_arg
             or error("missing argument: " .. arg_path )
 
          -- we put the value into the final path
@@ -630,9 +657,18 @@ http_path = function(path_id)
 end
 
 ----------------------------------------------------------------------
+-- create arweave argument path
+-- create_arg_path("id", "name") => arweave.id.name
+----------------------------------------------------------------------
+create_arg_path = function(path_id, name)
+   local arg_key = {"arweave", path_id, name}
+   return table.concat(arg_key, ".")
+end
+
+----------------------------------------------------------------------
 -- wrapper around http request for get
 ----------------------------------------------------------------------
-http_request = function(host, port, path_id, params)
+http_request = function(host, port, path_id)
    local output = stdnse.output_table()
    local method = api[path_id]["method"]
    local path = http_path(path_id)
@@ -688,26 +724,48 @@ http_request = function(host, port, path_id, params)
       end
 
       -- output headers
+      output.http_status = response.status
       output.headers = response.header
+      output.body = response.rawbody
       return output
-   end
-
-   if method ~= "get" or method ~= "head" then
-      error(path_id .. ": unsupported http method (" .. method .. ")")
    end
 
    --------------------------------------------------------------------
    -- post method, disabled for the moment
    --------------------------------------------------------------------
-   -- if method == "post" then
-   --   1. we retrieve the body from arguments
-   --   local body = stdnse.get_script_args("arweave.path.body")
-   -- end
+   if method == "post" then
+      -- we retrieve the body from arguments. By default, the body is
+      -- empty
+      local body_arg_path = create_arg_path(path_id, "body")
+      local body = stdnse.get_script_args(body_arg_path) or ""
+      response = http.post(host, port, path, {}, {}, body)
+
+      if not(response) then
+         return nil
+      end
+
+      -- if response is not 200 (error?) returns only headers
+      if response.status ~= 200 then
+         output.http_status = response.status
+         output.headers = response.header
+         return output
+      end
+
+      -- output headers and body
+      output.http_status = response.status
+      output.headers = response.header
+      output.body = response.rawbody
+      return output
+   end
+
+   error(path_id .. ": unsupported http method (" .. method .. ")")
 end
 
+----------------------------------------------------------------------
 -- returns true if it's a gateway or a miner, else false. To do that,
 -- this function analyze the JSON object returned by / using get
 -- method.
+----------------------------------------------------------------------
 is_gateway = function(host, port)
    local output = http_request(host, port, "root")
 
