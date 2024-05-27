@@ -92,7 +92,6 @@
 --
 -- @TODO add HTTP POST method support
 -- @TODO add HTTP OPTIONS method support
--- @TODO add script argument support
 -- @TODO add fuzzer
 -- @TODO add application/etf support
 -- @TODO randomize api table before scanning
@@ -114,347 +113,468 @@ Idendify and collect information about arweave gateways and miners.
 categories = {"default", "discovery", "safe", "version"}
 portrule = shortport.port_or_service(1984, "arweave", "tcp", "open")
 
+----------------------------------------------------------------------
+-- default header used
+----------------------------------------------------------------------
 local default_headers = {
    {"content-type", "application/json"}
 }
 
+----------------------------------------------------------------------
+-- api table containing arweave api mapping
+----------------------------------------------------------------------
 local api = {
-   -- get methods without parameters
-   admin_debug = {
-      scan = "default",
-      method = "get",
-      path = { "ar-io", "admin", "debug" }
-   },
-   block_index = {
-      scan = "default",
-      method = "get",
-      path = { "block_index" }
-   },
-   block_index2 = {
-      scan = "default",
-      method = "get",
-      path = { "block_index2" }
-   },
-   chunk = {
-      scan = "default",
-      method = "get",
-      path = { "chunk" }
-   },
-   chunk2 = {
-      scan = "default",
-      method = "get",
-      path = { "chunk2" }
-   },
-   chunk_proof = {
-      scan = "default",
-      method = "get",
-      path = { "chunk_proof" }
-   },
-   coordinated_mining_partition_table = {
-      scan = "full",
-      method = "get",
-      path = { "coordinated_mining", "partition_table" }
-   },
-   coordinated_mining_state = {
-      scan = "full",
-      method = "get",
-      path = { "coordinated_mining", "state" }
-   },
-   current_block = {
-      scan = "full",
-      method = "get",
-      path = { "current_block" }
-   },
-   data_sync_record = {
-      scan = "default",
-      method = "get",
-      path = { "data_sync_record" }
-   },
+   -- no params
    root = {
       scan = "init",
       method = "get",
       path = {}
    },
-   height = {
+
+   -- no params
+   get_admin_debug = {
+      scan = "default",
+      method = "get",
+      path = { "ar-io", "admin", "debug" }
+   },
+
+   -- no params
+   get_block_index = {
+      scan = "default",
+      method = "get",
+      path = { "block_index" }
+   },
+
+   -- no params
+   get_block_index2 = {
+      scan = "default",
+      method = "get",
+      path = { "block_index2" }
+   },
+
+   -- no params
+   get_chunk = {
+      scan = "default",
+      method = "get",
+      path = { "chunk" }
+   },
+
+   -- no params
+   get_chunk2 = {
+      scan = "default",
+      method = "get",
+      path = { "chunk2" }
+   },
+
+   -- no params
+   get_chunk_proof = {
+      scan = "default",
+      method = "get",
+      path = { "chunk_proof" }
+   },
+
+   -- no params
+   get_coordinated_mining_partition_table = {
+      scan = "full",
+      method = "get",
+      path = { "coordinated_mining", "partition_table" }
+   },
+
+   -- no params
+   get_coordinated_mining_state = {
+      scan = "full",
+      method = "get",
+      path = { "coordinated_mining", "state" }
+   },
+
+   -- no params
+   get_current_block = {
+      scan = "full",
+      method = "get",
+      path = { "current_block" }
+   },
+
+   -- no params
+   get_data_sync_record = {
+      scan = "default",
+      method = "get",
+      path = { "data_sync_record" }
+   },
+
+   -- no params
+   get_height = {
       scan = "default",
       method = "get",
       path = { "height" }
    },
-   info = {
+
+   -- no params
+   get_info = {
       scan = "default",
       method = "get",
       path = { "info" }
    },
-   jobs = {
+
+   -- no params
+   get_jobs = {
       scan = "default",
       method = "get",
       path = { "jobs" }
    },
-   peers = {
+
+   -- no params
+   get_peers = {
       scan = "default",
       method = "get",
       path = { "peers" }
    },
-   queue = {
+
+   -- no params
+   get_queue = {
       scan = "default",
       method = "get",
       path = { "queue" }
    },
-   rates = {
+
+   -- no params
+   get_rates = {
       scan = "default",
       method = "get",
       path = { "rates" }
    },
-   recent_hash_list_diff = {
+
+   -- no params
+   get_recent_hash_list_diff = {
       scan = "default",
       method = "get",
       path = { "recent_hash_list_diff" }
    },
-   sync_buckets = {
+
+   -- no params
+   get_sync_buckets = {
       scan = "default",
       method = "get",
       path = { "sync_buckets" }
    },
-   time = {
+
+   -- no params
+   get_time = {
       scan = "default",
       method = "get",
       path = { "time" }
    },
-   total_supply = {
+
+   -- no params
+   get_total_supply = {
       scan = "default",
       method = "get",
       path = { "total_supply" }
    },
-   tx_anchor = {
+
+   -- no params
+   get_tx_anchor = {
       scan = "default",
       method = "get",
       path = { "tx_anchor" }
    },
-   tx_pending = {
+
+   -- no params
+   get_tx_pending = {
       scan = "default",
       method = "get",
       path = { "tx", "pending" }
    },
-   vdf = {
+
+   -- no params
+   get_vdf = {
       scan = "default",
       method = "get",
       path = { "vdf" }
    },
-   vdf2 = {
+
+   -- no params
+   get_vdf2 = {
       scan = "default",
       method = "get",
       path = { "vdf2" }
    },
-   vdf2_previous_session = {
+
+   -- no params
+   get_vdf2_previous_session = {
       scan = "default",
       method = "get",
       path = { "vdf2", "previous_session" }
    },
-   vdf2_session = {
+
+   -- no params
+   get_vdf2_session = {
       scan = "default",
       method = "get",
       path = { "vdf2", "session" }
    },
-   vdf_previous_session = {
+
+   -- no params
+   get_vdf_previous_session = {
       scan = "default",
       method = "get",
       path = { "vdf", "previous_session" }
    },
-   vdf_session = {
+
+   -- no params
+   get_vdf_session = {
       scan = "default",
       method = "get",
       path = { "vdf", "session" }
    },
-   wallet = {
+
+   -- no params
+   get_wallet = {
       scan = "default",
       method = "get",
       path = { "wallet_list" }
    },
 
-   -- head methods
+   -- no params
    head_root = {
       scan = "full",
       method = "head",
       path = {}
    },
+
+   -- no params
    head_info = {
       scan = "full",
       method = "head",
       path = { "info" }
    },
 
-   -- get methods with arguments in path
-   price_size = {
+   -- ok: arweave.get_price_size.size = 123
+   get_price_size = {
       scan = "full",
       method = "get",
-      path = {"price", { name = "size" } }
+      path = { "price", { arg_name = "size" } }
    },
-   price_size_target = {
+
+   -- ok: arweave.get_price_size_target.size = 123
+   get_price_size_target = {
       scan = "full",
       method = "get",
-      path = { "price", { name = "size" }, "target" }
+      path = { "price", { arg_name = "size" }, "target" }
    },
-   wallet_balance = {
+
+   -- ok: arweave.get_wallet_balance.address = "address"
+   get_wallet_balance = {
       scan = "full",
       method = "get",
-      path = { "wallet", { name = "address" }, "balance" }
+      path = { "wallet", { arg_name = "address" }, "balance" }
    },
-   wallet_last_tx = {
+
+   -- ok: arweave.get_wallet_last_tx.address = "address"
+   get_wallet_last_tx = {
       scan = "full",
       method = "get",
-      path = { "wallet" , { name = "address" }, "last_tx" }
+      path = { "wallet" , { arg_name = "address" }, "last_tx" }
    },
-   block_height = {
+
+   -- ok: arweave.get_block_height.height = 123
+   get_block_height = {
       scan = "full",
       method = "get",
-      path = { "block", "height", { name = "height" } }
+      path = { "block", "height", { arg_name = "height" } }
    },
-   block_hash = {
+
+   -- ok: arweave.get_block_hash.hash = "hash"
+   get_block_hash = {
       scan = "full",
       method = "get",
-      path = { "block", "hash", { name = "hash" } }
+      path = { "block", "hash", { arg_name = "hash" } }
    },
-   tx = {
+
+   -- ok: arweave.get_tx.tx_id = "tx_id"
+   get_tx = {
       scan = "full",
       method = "get",
-      path = { "tx", { name = "tx_id" } }
+      path = { "tx", { arg_name = "tx_id" } }
    },
-   tx_offset = {
+
+   -- ok: arweave.get_tx_offset.tx_id = "tx_id"
+   get_tx_offset = {
       scan = "full",
       method = "get",
-      path = { "tx", { name = "tx_id" }, "offset" }
+      path = { "tx", { arg_name = "tx_id" }, "offset" }
    },
-   tx_status = {
+
+   -- ok: arweave.get_tx_state.tx_id = "tx_id"
+   get_tx_status = {
       scan = "full",
       method = "get",
-      path = { "tx", { name = "tx_id" } , "status" }
+      path = { "tx", { arg_name = "tx_id" } , "status" }
    },
-   chunks = {
+
+   -- ok: arweave.get_chunks.offset = "offset"
+   get_chunks = {
       scan = "full",
       method = "get",
-      path = { "chunk", { name = "offset" } }
+      path = { "chunk", { arg_name = "offset" } }
    },
-   admin_queue_tx = {
+
+   -- ok: arweave.post_admin_queue_tx.body = ""
+   post_admin_queue_tx = {
       scan = "full",
       method = "post",
       path = { "ar-io", "admin", "queue-tx" }
    },
-   admin_block_data = {
+
+   -- ok: arweave.put_admin_block_data.body = ""
+   put_admin_block_data = {
       scan = "full",
       method = "put",
       path = { "ar-io", "admin", "block-data" }
    },
+
+   -- ok: arweave.get_farcaster_frame_tx.tx_id = ""
    get_farcaster_frame_tx = {
       scan = "full",
       method = "get",
-      path = { "local", "farcaster", "frame", { name = "tx_id" } }
+      path = { "local", "farcaster", "frame", { arg_name = "tx_id" } }
    },
 
-   -- post methods with body and/or parameters in path
+   -- ok: arweave.post_farcaster_frame_tx.tx_id = ""
+   -- wip: arweave.post_farcaster_frame_tx.body = ""
    post_farcaster_frame_tx = {
       scan = "fuzzer",
       method = "post",
-      path = { "local", "farcaster", "frame", { name = "tx_id" } },
+      path = { "local", "farcaster", "frame", { arg_name = "tx_id" } },
       params = {}
    },
-   post_block2 = {
+
+   -- wip: arweave.post_block2.body = ""
+   post_post_block2 = {
       scan = "fuzzer",
       method = "post",
       path = { "block2" },
       params = {}
    },
+
+   -- wip: arweave.post_block_announcement.body = ""
    post_block_announcement = {
       scan = "fuzzer",
       method = "post",
       path = { "block_announcement" },
       params = {}
    },
+
+   -- wip: arweave.post_block.body = ""
    post_block = {
       scan = "fuzzer",
       method = "post",
       path = { "block" },
       params = {}
    },
+
+   -- wip: arweave.post_block.body = ""
    post_chunk = {
       scan = "fuzzer",
       method = "post",
       path = { "chunk" },
       params = {}
    },
+
+   -- wip: arweave.post_coordinated_mining_h1.body = ""
    post_coordinated_mining_h1 = {
       scan = "fuzzer",
       method = "post",
       path = { "coordinated_mining", "h1" },
       params = {}
    },
+
+   -- wip: arweave.post_coordinated_mining_h2.body = ""
    post_coordinated_mining_h2 = {
       scan = "fuzzer",
       method = "post",
       path = { "coordinated_mining", "h2" },
       params = {}
    },
+
+   -- wip: arweave.post_height.body = ""
    post_height = {
       scan = "fuzzer",
       method = "post",
       path = { "height" },
       params = {}
    },
+
+   -- wip: arweave.post_partial_solution.body = ""
    post_partial_solution = {
       scan = "fuzzer",
       method = "post",
       path = { "partial_solution" },
       params = {}
    },
+
+   -- wip: arweave.post_peers.body = ""
    post_peers = {
       scan = "fuzzer",
       method = "post",
       path = { "peers" },
       params = {}
    },
+
+   -- wip: arweave.post_tx.body = ""
    post_tx = {
       scan = "fuzzer",
       method = "post",
       path = { "tx" },
       params = {}
    },
+
+   -- wip: arweave.post_tx2.body = ""
    post_tx2 = {
       scan = "fuzzer",
       method = "post",
       path = { "tx2" },
       params = {}
    },
+
+   -- wip: arweave.post_unsigned_tx.body = ""
    post_unsigned_tx = {
       scan = "fuzzer",
       method = "post",
       path = { "unsigned_tx" },
       params = {}
    },
+
+   -- wip: arweave.post_vdf.body = ""
+   -- wip: arweave.post_vdf.fuzzing = true | false
    post_vdf = {
       scan = "fuzzer",
       method = "post",
-      path = { "vdf" },
-      headers = default_headers,
-      params = {}
+      path = { "vdf" }
    },
+
+   -- wip: arweave.post_wallet.body = ""
+   -- wip: arweave.post_wallet.fuzzing = true | false
    post_wallet = {
       scan = "fuzzer",
       method = "post",
-      path = { "wallet" },
-      headers = default_headers,
-      params = {}
+      path = { "wallet" }
    },
 
-   -- options method
+   -- wip: arweave.options_block.fuzzing = true | false
    options_block = {
       scan = "full",
       method = "option",
       path = { "block" }
    },
+
+   -- wip: arweave.options_peers.fuzzing = true | false
    options_peer = {
       scan = "full",
       method = "option",
       path = { "peer" }
    },
+
+   -- wip: arweave.options_tx.fuzzing = true | false
    options_tx = {
       scan = "full",
       method = "tx",
@@ -462,7 +582,9 @@ local api = {
    }
 }
 
+----------------------------------------------------------------------
 -- full scan generated with the key present in api data structure
+----------------------------------------------------------------------
 local full_scan = function()
    local buffer = {}
    for key, value in pairs(api) do
@@ -471,27 +593,49 @@ local full_scan = function()
    return buffer
 end
 
+----------------------------------------------------------------------
 -- convert a table made of string and table into a path
-http_path = function(list, params)
+----------------------------------------------------------------------
+http_path = function(path_id)
+   local template_path = api[path_id]["path"]
    local path = {}
-   for key, value in ipairs(list) do
+
+   for key, value in ipairs(template_path) do
+
+      -- if its a string, we put it in the final path
       if type(value) == "string" then
          table.insert(path, value)
       end
+
+      -- if it's a table, that means this is a variable and we should
+      -- fetch the value from arguments by joining the reference
+      -- passed previously and the name extracted from the table.
       if type(value) == "table" then
-         local name = value["name"]
-         local param = params[name]
-         table.insert(path, param)
+         local name = value["arg_name"]
+
+         -- we create nmap argument path
+         local arg_key = {"arweave", path_id, name}
+         local arg_path = table.concat(arg_key, ".")
+
+         -- we fetch argument or crash
+         local arg = stdnse.get_script_args(arg_path)
+            or error("missing argument: " .. arg_path )
+
+         -- we put the value into the final path
+         table.insert(path, arg)
       end
    end
+
    return "/" .. table.concat(path, "/")
 end
 
+----------------------------------------------------------------------
 -- wrapper around http request for get
+----------------------------------------------------------------------
 http_request = function(host, port, path_id, params)
    local output = stdnse.output_table()
    local method = api[path_id]["method"]
-   local path = http_path(api[path_id]["path"])
+   local path = http_path(path_id)
    local response
 
    -- general information regarding request
@@ -499,7 +643,9 @@ http_request = function(host, port, path_id, params)
    output.http_path = path
    output.http_method = method
 
+   --------------------------------------------------------------------
    -- get method, assume the content returned is json by default.
+   --------------------------------------------------------------------
    if method == "get" then
       response = http.get(host, port, path)
 
@@ -531,7 +677,9 @@ http_request = function(host, port, path_id, params)
       return output
    end
 
+   --------------------------------------------------------------------
    -- head method, returns only headers
+   --------------------------------------------------------------------
    if method == "head" then
       response = http.head(host, port, path)
 
@@ -547,6 +695,14 @@ http_request = function(host, port, path_id, params)
    if method ~= "get" or method ~= "head" then
       error(path_id .. ": unsupported http method (" .. method .. ")")
    end
+
+   --------------------------------------------------------------------
+   -- post method, disabled for the moment
+   --------------------------------------------------------------------
+   -- if method == "post" then
+   --   1. we retrieve the body from arguments
+   --   local body = stdnse.get_script_args("arweave.path.body")
+   -- end
 end
 
 -- returns true if it's a gateway or a miner, else false. To do that,
@@ -556,49 +712,72 @@ is_gateway = function(host, port)
    local output = http_request(host, port, "root")
 
    if output.http_status ~= 200 then
-      return false
+      return nil
    end
    if not(output.body.version) then
-      return false
+      return nil
    end
    if not(output.body.release) then
-      return false
+      return nil
    end
    if not(output.body.network) then
-      return false
+      return nil
    end
    if string.find(output.body.network, "^arweave") then
       return output
    end
 end
 
+----------------------------------------------------------------------
 -- entry point
+----------------------------------------------------------------------
 action = function(host, port)
-   if is_gateway(host, port) then
+   local gateway = is_gateway(host, port)
+   if gateway then
       local output = stdnse.output_table()
       local result
 
-      -- get arweave.scan variable, set to "default" by default
-      local scan = stdnse.get_script_args("arweave.scan") or "default"
-
       -- set more information about the service
       port.version.name = "arweave"
-      port.version.product = output.network
-      port.version.version = output.version
+      port.version.product = gateway.body.network
+      port.version.version = gateway.body.version
       port.version.extrainfo = {
-         release = output.release,
-         peers = output.peers,
-         height = output.heigh
+         release = gateway.body.release,
+         peers = gateway.body.peers,
+         height = gateway.body.heigh
       }
       nmap.set_port_version(host, port)
 
+      -- get arweave.scan variable, set to "default" by default
+      local scan = stdnse.get_script_args("arweave.scan") or "default"
+      local scan_only = stdnse.get_script_args("arweave.scan_only") or nil
+      local scan_filter = stdnse.get_script_args("arweave.scan_filter") or nil
+
+      -- scan only one path from api
+      if scan_only and api[scan_only] then
+         result = http_request(host, port, scan_only)
+         output[scan_only] = result
+         return output
+      end
+
+      -- scan path from api based on regexp
+      if scan_filter then
+         for key, value in pairs(api) do
+            if string.find(key, scan_filter) then
+               result = http_request(host, port, key)
+               output[key] = result
+            end
+         end
+      end
+
+      -- by default, use scan mode previously set
       for key, value in pairs(api) do
          if value["scan"] == scan then
             result = http_request(host, port, key)
             output[key] = result
          end
       end
-
       return output
+
    end
 end

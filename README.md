@@ -33,18 +33,19 @@ flag.
 
  - [x] HTTP GET method support without parameters
  - [x] HTTP HEAD method
- - [ ] HTTP GET method with path parameters
+ - [x] HTTP GET method with path parameters
  - [ ] HTTP POST method with path parameters and configured body
- - [ ] HTTP OPTIONS method 
+ - [ ] HTTP OPTIONS method
  - [ ] Randomized Scanner
  - [ ] Add arguments supports:
    - [ ] `arweave.http_header_content_type="application/json"`
    - [ ] `arweave.randomize=true`: randomize path scan
-   - [ ] `arweave.scan=default`: default scan
-   - [ ] `arweave.scan=full` (include default): full scan including post and options
+   - [x] `arweave.scan=default`: default scan
+   - [x] `arweave.scan=full` (include default): full scan including post and options
    - [ ] `arweave.scan=fuzzer` (include default and full): full scan with totally random value
-   - [ ] `arweave.path_filter=.*`: filter scanned parse (bypass scan mode)
-   - [ ] `arweave.path_id_filter=.*`: filter path_id to scan (bypass scan mode)
+   - [x] `arweave.scan_only=api_id`: scan only one path (bypass scan mode)
+   - [x] `arweave.scan_filter=.*`: filter scanned parse (bypass scan mode)
+   - [ ] `arweave.http_header_authentication`: add bearer support
  - [ ] Fuzzer:
    - [ ] Simple ETF parser
    - [ ] Simple ETF serializer
