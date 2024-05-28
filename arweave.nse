@@ -18,6 +18,18 @@
 --
 -- -------------------------------------------------------------------
 --
+-- This Nmap NSE Script was created to identify and fingerprint
+-- arweave miners and gateways. Different level of scans are
+-- available. This script can also be used as fuzzer or for offensive
+-- purpose. It will also include:
+--
+--   o an ETF (Erlang Term Format) decoder/encoder
+--   o a fuzzer using type definition
+--   o a notification mechanism to prevent external service
+--   o a way to fingerprint the version of the server used
+--
+-- -------------------------------------------------------------------
+--
 -- Usage: nmap -p 1984 --script=arweave.nse
 --
 -- https://ar-io.dev/api-docs/
@@ -90,9 +102,10 @@
 --
 -- Nmap done: 1 IP address (1 host up) scanned in 2.27 seconds
 --
--- @TODO add fuzzer
+-- @TODO add fuzzer support
 -- @TODO add application/etf support
 -- @TODO randomize api table before scanning
+-- @TODO add header support
 --
 ----------------------------------------------------------------------
 local nmap = require "nmap"
@@ -103,6 +116,9 @@ local shortport = require "shortport"
 local stdnse = require "stdnse"
 local rand = require "rand"
 
+----------------------------------------------------------------------
+-- default information for nmap engine
+----------------------------------------------------------------------
 author = "Mathieu Kerjouan"
 license = "ISC-OpenBSD"
 description = [[
@@ -119,73 +135,116 @@ local default_headers = {
 }
 
 ----------------------------------------------------------------------
--- api table containing arweave api mapping
+-- api table containing arweave api mapping. An end-point is a table
+-- containining few mandatories and optional keys:
+--   o scan (mandatory): scan mode
+--   o method (mandatory): get | post | head
+--   o path (mandtory): a table made with string and tables
+--   o comment (optional): an optional comment
+--   o score (optional): a scoring returned in case of success/failure
+--   o version (optional): a way to check the version
+--   o body (optional): a way to specify body content
+--   o priority (optional):
+--   o attack (optional):
+--   o notify (optional):
+--   o headers (optional): default headers to use
+--
+-- A path is a table made of string and tables, with mandatories and
+-- optional keys:
+--  o [string]: static element
+--  o [table]: dynamic element
+--    o arg_name: the name of this variable
+--    o default: the default value if not configured
+--    o fuzzer: a function to generate this element
 ----------------------------------------------------------------------
 local api = {
+
+   --------------------------------------------------------------------
    -- no params
+   --------------------------------------------------------------------
    root = {
+      comment = "default path (/) used to evaluate the server.",
       scan = "init",
       method = "get",
       path = {}
    },
 
+   --------------------------------------------------------------------
    -- no params
+   --------------------------------------------------------------------
    get_admin_debug = {
+      comment = "admin debug interface. It should be close by default.",
       scan = "default",
       method = "get",
       path = { "ar-io", "admin", "debug" }
    },
 
+   --------------------------------------------------------------------
    -- no params
+   --------------------------------------------------------------------
    get_block_index = {
       scan = "default",
       method = "get",
       path = { "block_index" }
    },
 
+   --------------------------------------------------------------------
    -- no params
+   --------------------------------------------------------------------
    get_block_index2 = {
       scan = "default",
       method = "get",
       path = { "block_index2" }
    },
 
+   --------------------------------------------------------------------
    -- no params
+   --------------------------------------------------------------------
    get_chunk = {
       scan = "default",
       method = "get",
       path = { "chunk" }
    },
 
+   --------------------------------------------------------------------
    -- no params
+   --------------------------------------------------------------------
    get_chunk2 = {
       scan = "default",
       method = "get",
       path = { "chunk2" }
    },
 
+   --------------------------------------------------------------------
    -- no params
+   --------------------------------------------------------------------
    get_chunk_proof = {
       scan = "default",
       method = "get",
       path = { "chunk_proof" }
    },
 
+   --------------------------------------------------------------------
    -- no params
+   --------------------------------------------------------------------
    get_coordinated_mining_partition_table = {
       scan = "full",
       method = "get",
       path = { "coordinated_mining", "partition_table" }
    },
 
+   --------------------------------------------------------------------
    -- no params
+   --------------------------------------------------------------------
    get_coordinated_mining_state = {
       scan = "full",
       method = "get",
       path = { "coordinated_mining", "state" }
    },
 
+   --------------------------------------------------------------------
    -- no params
+   --------------------------------------------------------------------
    get_current_block = {
       scan = "full",
       comment = "deprecated",
@@ -193,43 +252,54 @@ local api = {
       path = { "current_block" }
    },
 
+   --------------------------------------------------------------------
    -- no params
+   --------------------------------------------------------------------
    get_data_sync_record = {
       scan = "default",
       method = "get",
       path = { "data_sync_record" }
    },
 
-
+   --------------------------------------------------------------------
    -- no params
+   --------------------------------------------------------------------
    get_height = {
       scan = "default",
       method = "get",
       path = { "height" }
    },
 
+   --------------------------------------------------------------------
    -- no params
+   --------------------------------------------------------------------
    get_info = {
       scan = "default",
       method = "get",
       path = { "info" }
    },
 
+   --------------------------------------------------------------------
    -- no params
+   --------------------------------------------------------------------
    get_jobs = {
       scan = "default",
       method = "get",
       path = { "jobs" }
    },
 
+   --------------------------------------------------------------------
    -- no params
+   --------------------------------------------------------------------
    get_peers = {
       scan = "default",
       method = "get",
       path = { "peers" }
    },
 
+   --------------------------------------------------------------------
    -- no params
+   --------------------------------------------------------------------
    get_queue = {
       scan = "default",
       comment = "deprecated end-point",
@@ -237,317 +307,456 @@ local api = {
       path = { "queue" }
    },
 
+   --------------------------------------------------------------------
    -- no params
+   --------------------------------------------------------------------
    get_rates = {
       scan = "default",
       method = "get",
       path = { "rates" }
    },
 
+   --------------------------------------------------------------------
    -- no params
+   --------------------------------------------------------------------
    get_recent_hash_list_diff = {
       scan = "default",
       method = "get",
       path = { "recent_hash_list_diff" }
    },
 
+   --------------------------------------------------------------------
    -- no params
+   --------------------------------------------------------------------
    get_sync_buckets = {
       scan = "default",
       method = "get",
       path = { "sync_buckets" }
    },
 
+   --------------------------------------------------------------------
    -- no params
+   --------------------------------------------------------------------
    get_time = {
       scan = "default",
       method = "get",
       path = { "time" }
    },
 
+   --------------------------------------------------------------------
    -- no params
+   --------------------------------------------------------------------
    get_total_supply = {
       scan = "default",
       method = "get",
       path = { "total_supply" }
    },
 
+   --------------------------------------------------------------------
    -- no params
+   --------------------------------------------------------------------
    get_tx_anchor = {
       scan = "default",
       method = "get",
       path = { "tx_anchor" }
    },
 
+   --------------------------------------------------------------------
    -- no params
+   --------------------------------------------------------------------
    get_tx_pending = {
       scan = "default",
       method = "get",
       path = { "tx", "pending" }
    },
 
+   --------------------------------------------------------------------
    -- no params
+   --------------------------------------------------------------------
    get_vdf = {
       scan = "default",
       method = "get",
       path = { "vdf" }
    },
 
+   --------------------------------------------------------------------
    -- no params
+   --------------------------------------------------------------------
    get_vdf2 = {
       scan = "default",
       method = "get",
       path = { "vdf2" }
    },
 
+   --------------------------------------------------------------------
    -- no params
+   --------------------------------------------------------------------
    get_vdf2_previous_session = {
       scan = "default",
       method = "get",
       path = { "vdf2", "previous_session" }
    },
 
+   --------------------------------------------------------------------
    -- no params
+   --------------------------------------------------------------------
    get_vdf2_session = {
       scan = "default",
       method = "get",
       path = { "vdf2", "session" }
    },
 
+   --------------------------------------------------------------------
    -- no params
+   --------------------------------------------------------------------
    get_vdf_previous_session = {
       scan = "default",
       method = "get",
       path = { "vdf", "previous_session" }
    },
 
+   --------------------------------------------------------------------
    -- no params
+   --------------------------------------------------------------------
    get_vdf_session = {
       scan = "default",
       method = "get",
       path = { "vdf", "session" }
    },
 
+   --------------------------------------------------------------------
    -- no params
+   --------------------------------------------------------------------
    get_wallet = {
       scan = "default",
       method = "get",
       path = { "wallet_list" }
    },
 
+   --------------------------------------------------------------------
    -- no params
+   --------------------------------------------------------------------
    head_root = {
       scan = "full",
       method = "head",
       path = {}
    },
 
+   --------------------------------------------------------------------
    -- no params
+   --------------------------------------------------------------------
    head_info = {
       scan = "full",
       method = "head",
       path = { "info" }
    },
 
+   --------------------------------------------------------------------
    -- ok: arweave.get_price_size.size = 123
+   --------------------------------------------------------------------
    get_price_size = {
       scan = "fuzzer",
       method = "get",
-      path = { "price", { arg_name = "size" } },
-      path_default = {
-         size = ""
+      path = {
+         "price",
+         {
+            arg_name = "size",
+            default = "",
+            fuzzer = {}
+         }
       }
    },
 
+   --------------------------------------------------------------------
    -- ok: arweave.get_price_size_target.size = 123
+   --------------------------------------------------------------------
    get_price_size_target = {
       scan = "fuzzer",
       method = "get",
-      path = { "price", { arg_name = "size" }, "target" },
-      path_default = {
-         size = ""
+      path = {
+         "price",
+         {
+            arg_name = "size",
+            default = "",
+            fuzzer = {}
+         },
+         "target"
       }
    },
 
+   --------------------------------------------------------------------
    -- ok: arweave.get_wallet_balance.address = "address"
+   --------------------------------------------------------------------
    get_wallet_balance = {
       scan = "fuzzer",
       method = "get",
-      path = { "wallet", { arg_name = "address" }, "balance" },
-      path_default = {
-         address = ""
+      path = {
+         "wallet",
+         {
+            arg_name = "address",
+            default = "",
+            fuzzer = {}
+         },
+         "balance"
       }
    },
 
+   --------------------------------------------------------------------
    -- ok: arweave.get_wallet_last_tx.address = "address"
+   --------------------------------------------------------------------
    get_wallet_last_tx = {
       scan = "fuzzer",
       method = "get",
-      path = { "wallet" , { arg_name = "address" }, "last_tx" },
-      path_default = {
-         address = ""
+      path = {
+         "wallet",
+         {
+            arg_name = "address",
+            default = "",
+            fuzzer = {}
+         },
+         "last_tx"
       }
    },
 
+   --------------------------------------------------------------------
    -- ok: arweave.get_block_height.height = 123
+   --------------------------------------------------------------------
    get_block_height = {
       scan = "fuzzer",
       method = "get",
-      path = { "block", "height", { arg_name = "height" } },
-      path_default = {
-         height = 0
+      path = {
+         "block",
+         "height",
+         {
+            arg_name = "height",
+            default = "",
+            fuzzer = {}
+         }
       }
    },
 
+   --------------------------------------------------------------------
    -- ok: arweave.get_block_hash.hash = "hash"
+   --------------------------------------------------------------------
    get_block_hash = {
       scan = "fuzzer",
       method = "get",
-      path = { "block", "hash", { arg_name = "hash" } },
-      path_default = {
-         hash = ""
+      path = {
+         "block",
+         "hash",
+         {
+            arg_name = "hash",
+            default = "",
+            fuzzer = {}
+         }
       }
    },
 
+   --------------------------------------------------------------------
    -- ok: arweave.get_tx.tx_id = "tx_id"
+   --------------------------------------------------------------------
    get_tx = {
       scan = "fuzzer",
       method = "get",
-      path = { "tx", { arg_name = "tx_id" } },
-      path_default = {
-         tx_id = ""
+      path = {
+         "tx",
+         {
+            arg_name = "tx_id",
+            default = "",
+            fuzzer = {}
+         }
       }
    },
 
+   --------------------------------------------------------------------
    -- ok: arweave.get_tx_offset.tx_id = "tx_id"
+   --------------------------------------------------------------------
    get_tx_offset = {
       scan = "fuzzer",
       method = "get",
-      path = { "tx", { arg_name = "tx_id" }, "offset" },
-      path_default = {
-         tx_id = ""
+      path = {
+         "tx",
+         {
+            arg_name = "tx_id",
+            default = "",
+            fuzzer = {}
+         },
+         "offset"
       }
    },
 
+   --------------------------------------------------------------------
    -- ok: arweave.get_tx_state.tx_id = "tx_id"
+   --------------------------------------------------------------------
    get_tx_status = {
       scan = "fuzzer",
       method = "get",
-      path = { "tx", { arg_name = "tx_id" } , "status" },
-      path_default = {
-         tx_id = ""
+      path = {
+         "tx",
+         {
+            arg_name = "tx_id",
+            default = "",
+            fuzzer = {}
+         },
+         "status"
       }
    },
 
+   --------------------------------------------------------------------
    -- ok: arweave.get_chunks.offset = "offset"
+   --------------------------------------------------------------------
    get_chunks = {
       scan = "fuzzer",
       method = "get",
-      path = { "chunk", { arg_name = "offset" } },
-      path_default = {
-         offset = ""
+      path = {
+         "chunk",
+         {
+            arg_name = "offset",
+            default = "",
+            fuzzer = {}
+         }
       }
    },
 
+   --------------------------------------------------------------------
    -- ok: arweave.post_admin_queue_tx.body = ""
+   --------------------------------------------------------------------
    post_admin_queue_tx = {
       scan = "full",
       method = "post",
       path = { "ar-io", "admin", "queue-tx" }
    },
 
+   --------------------------------------------------------------------
    -- ok: arweave.put_admin_block_data.body = ""
+   --------------------------------------------------------------------
    put_admin_block_data = {
       scan = "full",
       method = "put",
       path = { "ar-io", "admin", "block-data" }
    },
 
+   --------------------------------------------------------------------
    -- ok: arweave.get_farcaster_frame_tx.tx_id = ""
+   --------------------------------------------------------------------
    get_farcaster_frame_tx = {
       scan = "fuzzer",
       method = "get",
-      path = { "local", "farcaster", "frame", { arg_name = "tx_id" } },
-      path_default = {
-         tx_id = ""
+      path = {
+         "local",
+         "farcaster",
+         "frame",
+         {
+            arg_name = "tx_id",
+            default = "",
+            fuzzer = {}
+         }
       }
    },
 
+   --------------------------------------------------------------------
    -- ok: arweave.post_farcaster_frame_tx.tx_id = ""
    -- wip: arweave.post_farcaster_frame_tx.body = ""
+   --------------------------------------------------------------------
    post_farcaster_frame_tx = {
       scan = "fuzzer",
       method = "post",
-      path = { "local", "farcaster", "frame", { arg_name = "tx_id" } },
-      path_default = {
-         tx_id = ""
+      path = {
+         "local",
+         "farcaster",
+         "frame",
+         {
+            arg_name = "tx_id",
+            default = "",
+            fuzzer = {}
+         }
       }
    },
 
+   --------------------------------------------------------------------
    -- ok: arweave.post_block2.body = ""
+   --------------------------------------------------------------------
    post_post_block2 = {
       scan = "full",
       method = "post",
       path = { "block2" },
    },
 
+   --------------------------------------------------------------------
    -- ok: arweave.post_block_announcement.body = ""
+   --------------------------------------------------------------------
    post_block_announcement = {
       scan = "full",
       method = "post",
       path = { "block_announcement" },
    },
 
+   --------------------------------------------------------------------
    -- ok: arweave.post_block.body = ""
+   --------------------------------------------------------------------
    post_block = {
       scan = "full",
       method = "post",
       path = { "block" },
    },
 
+   --------------------------------------------------------------------
    -- ok: arweave.post_block.body = ""
+   --------------------------------------------------------------------
    post_chunk = {
       scan = "full",
       method = "post",
       path = { "chunk" },
    },
 
+   --------------------------------------------------------------------
    -- ok: arweave.post_coordinated_mining_h1.body = ""
+   --------------------------------------------------------------------
    post_coordinated_mining_h1 = {
       scan = "full",
       method = "post",
       path = { "coordinated_mining", "h1" },
    },
 
+   --------------------------------------------------------------------
    -- ok: arweave.post_coordinated_mining_h2.body = ""
+   --------------------------------------------------------------------
    post_coordinated_mining_h2 = {
       scan = "full",
       method = "post",
       path = { "coordinated_mining", "h2" },
    },
 
+   --------------------------------------------------------------------
    -- ok: arweave.post_height.body = ""
+   --------------------------------------------------------------------
    post_height = {
       scan = "full",
       method = "post",
       path = { "height" },
    },
 
+   --------------------------------------------------------------------
    -- ok: arweave.post_partial_solution.body = ""
+   --------------------------------------------------------------------
    post_partial_solution = {
       scan = "full",
       method = "post",
       path = { "partial_solution" }
    },
 
+   --------------------------------------------------------------------
    -- ok: arweave.post_peers.body = ""
+   --------------------------------------------------------------------
    post_peers = {
       scan = "full",
       method = "post",
       path = { "peers" },
    },
 
+   --------------------------------------------------------------------
    -- ok: arweave.post_tx.body = ""
+   --------------------------------------------------------------------
    post_tx = {
       scan = "full",
       comment = "return json encoded transaction",
@@ -555,7 +764,9 @@ local api = {
       path = { "tx" }
    },
 
+   --------------------------------------------------------------------
    -- ok: arweave.post_tx2.body = ""
+   --------------------------------------------------------------------
    post_tx2 = {
       scan = "full",
       comment = "return binary encoded transaction",
@@ -563,345 +774,665 @@ local api = {
       path = { "tx2" }
    },
 
+   --------------------------------------------------------------------
    -- ok: arweave.post_unsigned_tx.body = ""
+   --------------------------------------------------------------------
    post_unsigned_tx = {
       scan = "full",
       method = "post",
       path = { "unsigned_tx" }
    },
 
+   --------------------------------------------------------------------
    -- ok: arweave.post_vdf.body = ""
    -- wip: arweave.post_vdf.fuzzing = true | false
+   --------------------------------------------------------------------
    post_vdf = {
       scan = "full",
       method = "post",
       path = { "vdf" }
    },
 
+   --------------------------------------------------------------------
    -- ok: arweave.post_wallet.body = ""
    -- wip: arweave.post_wallet.fuzzing = true | false
+   --------------------------------------------------------------------
    post_wallet = {
       scan = "full",
       method = "post",
       path = { "wallet" }
    },
 
+   --------------------------------------------------------------------
+   --
+   --------------------------------------------------------------------
    get_block_index_from_to = {
       scan = "fuzzer",
       method = "get",
-      path = { "block_index", { arg_name = "from" }, { arg_name = "to" } },
-      path_default = {
-         from = "",
-         to = ""
+      path = {
+         "block_index",
+         {
+            arg_name = "from",
+            default = "",
+            fuzzer = {}
+         },
+         {
+            arg_name = "to",
+            default = "",
+            fuzzer = {}
+         }
       }
    },
 
+   --------------------------------------------------------------------
+   --
+   --------------------------------------------------------------------
    get_block_index2_from_to = {
       scan = "fuzzer",
       method = "get",
-      path = { "block_index2", { arg_name = "from" }, { arg_name = "to" } },
-      path_default = {
-         from = "",
-         to = ""
+      path = {
+         "block_index2",
+         {
+            arg_name = "from",
+            default = "",
+            fuzzer = {}
+         },
+         {
+            arg_name = "to",
+            default = "",
+            fuzzer = {}
+         }
       }
    },
 
+   --------------------------------------------------------------------
+   --
+   --------------------------------------------------------------------
    get_block_current = {
       scan = "full",
       method = "get",
       path = { "block", "current" }
    },
 
+   --------------------------------------------------------------------
+   --
+   --------------------------------------------------------------------
    get_data_sync_record_start_limit = {
       scan = "fuzzer",
       method = "get",
-      path = { "data_sync_record", { arg_name = "start"}, { arg_name = "limit" } },
-      path_default = {
-         start = "",
-         limit = ""
+      path = {
+         "data_sync_record",
+         {
+            arg_name = "start",
+            default = "",
+            fuzzer = {}
+         },
+         {
+            arg_name = "limit",
+            default = "",
+            fuzzer = {}
+         }
       }
    },
 
+   --------------------------------------------------------------------
+   --
+   --------------------------------------------------------------------
    get_recent_hash_list = {
       scan = "default",
       method = "get",
       path = { "recent_hash_list" }
    },
 
+   --------------------------------------------------------------------
+   --
+   --------------------------------------------------------------------
    get_hash_list = {
       scan = "default",
       method = "get",
       path = { "hash_list" }
    },
 
+   --------------------------------------------------------------------
+   --
+   --------------------------------------------------------------------
    get_hash_list_from_to = {
       scan = "fuzzer",
       method = "get",
-      path = { "hash_list", { arg_name = "from" }, { arg_name = "to" } },
-      path_default = {
-         from = "",
-         to = ""
+      path = {
+         "hash_list",
+         {
+            arg_name = "from",
+            default = "",
+            fuzzer = {}
+         },
+         {
+            arg_name = "to",
+            default = "",
+            fuzzer = {}
+         }
       }
    },
 
+   --------------------------------------------------------------------
+   --
+   --------------------------------------------------------------------
    get_hash_list2_from_to = {
       scan = "fuzzer",
       method = "get",
-      path = { "hash_list2", { arg_name = "from" }, { arg_name = "to" } },
-      path_default = {
-         from = "",
-         to = ""
+      path = {
+         "hash_list2",
+         {
+            arg_name = "from",
+            default = "",
+            fuzzer = {}
+         },
+         {
+            arg_name = "to",
+            default = "",
+            fuzzer = {}
+         }
       }
    },
 
+   --------------------------------------------------------------------
+   --
+   --------------------------------------------------------------------
    get_jobs_output = {
       scan = "fuzzer",
       method = "get",
-      path = { "jobs", { arg_name = "prev_output" } },
-      path_default = {
-         prev_output = ""
+      path = {
+         "jobs",
+         {
+            arg_name = "prev_output",
+            default = "",
+            fuzzer = {}
+         }
       }
    },
 
-      get_wallet_list_hash = {
+   --------------------------------------------------------------------
+   --
+   --------------------------------------------------------------------
+   get_wallet_list_hash = {
       scan = "fuzzer",
       method = "get",
-      path = { "wallet_list", { arg_name = "hash" } },
-      path_default = {
-         hash = ""
+      path = {
+         "wallet_list",
+         {
+            arg_name = "hash",
+            default = "",
+            fuzzer = {}
+         }
       }
    },
 
+   --------------------------------------------------------------------
+   --
+   --------------------------------------------------------------------
    get_wallet_list_hash_cursor = {
       scan = "fuzzer",
       method = "get",
-      path = { "wallet_list", { arg_name = "hash" }, { arg_name = "cursor" } },
-      path_default = {
-         hash = "",
-         cursor = ""
+      path = {
+         "wallet_list",
+         {
+            arg_name = "hash",
+            default = "",
+            fuzzer = {}
+         },
+         {
+            arg_name = "cursor",
+            default = "",
+            fuzzer = {}
+         }
       }
    },
 
+   --------------------------------------------------------------------
+   --
+   --------------------------------------------------------------------
    get_wallet_list_hash_address_balance = {
       scan = "fuzzer",
       method = "get",
-      path = { "wallet_list", { arg_name = "hash" }, { arg_name = "address" }, "balance" },
-      path_default = {
-         hash = "",
-         address = ""
+      path = {
+         "wallet_list",
+         {
+            arg_name = "hash",
+            default = "",
+            fuzzer = {}
+         },
+         {
+            arg_name = "address",
+            default = "",
+            fuzzer = {}
+         },
+         "balance"
       }
    },
 
+   --------------------------------------------------------------------
+   --
+   --------------------------------------------------------------------
    get_wallet_address_balance = {
       scan = "fuzzer",
       method = "get",
-      path = { "wallet", { arg_name = "address" }, "balance" },
-      path_default = {
-         address = ""
+      path = {
+         "wallet",
+         {
+            arg_name = "address",
+            default = "",
+            fuzzer = {}
+         },
+         "balance"
       }
    },
 
+   --------------------------------------------------------------------
+   --
+   --------------------------------------------------------------------
    get_wallet_address_reserved_rewards_total = {
       scan = "fuzzer",
       method = "get",
-      path = { "wallet", { arg_name = "address" }, "reserved_rewards_total" },
-      path_default = {
-         address = ""
+      path = {
+         "wallet",
+         {
+            arg_name = "address",
+            default = "",
+            fuzzer = {}
+         },
+         "reserved_rewards_total"
       }
    },
 
+   --------------------------------------------------------------------
+   --
+   --------------------------------------------------------------------
    get_wallet_address_last_tx = {
       scan = "fuzzer",
       method = "get",
-      path = { "wallet", { arg_name = "address" }, "last_tx" },
-      path_default = {
-         address = ""
+      path = {
+         "wallet",
+         {
+            arg_name = "address",
+            default = "",
+            fuzzer = {}
+         },
+         "last_tx"
       }
    },
 
+   --------------------------------------------------------------------
+   --
+   --------------------------------------------------------------------
    get_inflation_height = {
       scan = "fuzzer",
       method = "get",
-      path = { "inflation", { arg_name = "height" } },
-      path_default = {
-         height = ""
+      path = {
+         "inflation",
+         {
+            arg_name = "height",
+            default = "",
+            fuzzer = {}
+         }
       }
    },
 
+   --------------------------------------------------------------------
+   --
+   --------------------------------------------------------------------
    get_optimistic_price_size = {
       scan = "fuzzer",
       method = "get",
-      path = { "optimistic_price", { arg_name = "size" } },
-      path_default = {
-         size = ""
+      path = {
+         "optimistic_price",
+         {
+            arg_name = "size",
+            default = "",
+            fuzzer = {}
+         }
       }
    },
 
+   --------------------------------------------------------------------
+   --
+   --------------------------------------------------------------------
    get_optimistic_price_size_address = {
       scan = "fuzzer",
       method = "get",
-      path = { "optimistic_price", { arg_name = "size" }, { arg_name = "address" } },
-      path_default = {
-         size = "",
-         address = ""
+      path = {
+         "optimistic_price",
+         {
+            arg_name = "size",
+            default = "",
+            fuzzer = {}
+         },
+         {
+            arg_name = "address",
+            default = "",
+            fuzzer = {}
+         }
       }
    },
 
+   --------------------------------------------------------------------
+   --
+   --------------------------------------------------------------------
    get_v2price_size_address = {
       scan = "fuzzer",
       method = "get",
-      path = { "v2price", { arg_name = "size" }, { arg_name = "address" } },
-      path_default = {
-         size = "",
-         address = ""
+      path = {
+         "v2price",
+         {
+            arg_name = "size",
+            default = "",
+            fuzzer = {}
+         },
+         {
+            arg_name = "address",
+            default = "",
+            fuzzer = {}
+         }
       }
    },
 
+   --------------------------------------------------------------------
+   --
+   --------------------------------------------------------------------
    get_reward_history_bh = {
       scan = "fuzzer",
       method = "get",
-      path = { "reward_history", { arg_name = "bh" } },
-      path_default = {
-         bh = ""
+      path = {
+         "reward_history",
+         {
+            arg_name = "bh",
+            default = "",
+            fuzzer = {}
+         }
       }
    },
 
+   --------------------------------------------------------------------
+   --
+   --------------------------------------------------------------------
    get_block_time_history_bh = {
       scan = "fuzzer",
       method = "get",
-      path = { "block_time_history", { arg_name = "bh" } },
-      path_default = {
-         bh = ""
+      path = {
+         "block_time_history",
+         {
+            arg_name = "bh",
+            default = "",
+            fuzzer = {}
+         }
       }
    },
 
+   --------------------------------------------------------------------
+   --
+   --------------------------------------------------------------------
    get_block_type_id = {
       scan = "fuzzer",
       method = "get",
-      path = { "block", { arg_name = "type" }, { arg_name = "id" } },
-      path_default = {
-         type = "",
-         id = ""
+      path = {
+         "block",
+         {
+            arg_name = "type",
+            default = "",
+            fuzzer = {}
+         },
+         {
+            arg_name = "id",
+            default = "",
+            fuzzer = {}
+         }
       }
    },
 
+   --------------------------------------------------------------------
+   --
+   --------------------------------------------------------------------
    get_block_type_id_field = {
       scan = "fuzzer",
       method = "get",
-      path = { "block", { arg_name = "type" }, { arg_name = "id" }, { arg_name = "field" } },
-      path_default = {
-         type = "",
-         id = "",
-         field = ""
+      path = {
+         "block",
+         {
+            arg_name = "type",
+            default = "",
+            fuzzer = {}
+         },
+         {
+            arg_name = "id",
+            default = "",
+            fuzzer = {}
+         },
+         {
+            arg_name = "field",
+            default = "",
+            fuzzer = {}
+         }
       }
    },
 
+   --------------------------------------------------------------------
+   --
+   --------------------------------------------------------------------
    get_block2_type_id = {
       scan = "fuzzer",
       method = "get",
-      path = { "block2", { arg_name = "type" }, { arg_name = "id" } },
-      path_default = {
-         type = "",
-         id = ""
+      path = {
+         "block2",
+         {
+            arg_name = "type",
+            default = "",
+            fuzzer = {}
+         },
+         {
+            arg_name = "id",
+            default = "",
+            fuzzer = {}
+         }
       }
    },
 
+   --------------------------------------------------------------------
+   --
+   --------------------------------------------------------------------
    get_block_height_wallet_address_balance = {
       scan = "fuzzer",
       method = "get",
-      path = { "block", "height", { arg_name = "height" }, "wallet", { arg_name = "address" }, "balance" },
-      path_default = {
-         height = "",
-         address = ""
+      path = {
+         "block",
+         "height",
+         {
+            arg_name = "height",
+            default = "",
+            fuzzer = {}
+         },
+         "wallet",
+         {
+            arg_name = "address",
+            default = "",
+            fuzzer = {}
+         },
+         "balance"
       }
    },
 
+   --------------------------------------------------------------------
+   --
+   --------------------------------------------------------------------
    get_tx_hash_field = {
       scan = "fuzzer",
       method = "get",
-      path = { "tx", { arg_name = "hash" }, { arg_name = "field" } },
-      path_default = {
-         hash = "",
-         field = ""
+      path = {
+         "tx",
+         {
+            arg_name = "hash",
+            default = "",
+            fuzzer = {}
+         },
+         {
+            arg_name = "field",
+            default = "",
+            fuzzer = {}
+         }
       }
    },
 
+   --------------------------------------------------------------------
+   --
+   --------------------------------------------------------------------
    get_balance_address_network_token = {
       scan = "fuzzer",
       method = "get",
-      path = { "balance", { arg_name = "address" }, { arg_name = "network" }, { arg_name = "token" } },
-      path_default = {
-         address = "",
-         network = "",
-         token = ""
+      path = {
+         "balance",
+         {
+            arg_name = "address",
+            default = "",
+            fuzzer = {}
+         },
+         {
+            arg_name = "network",
+            default = "",
+            fuzzer = {}
+         },
+         {
+            arg_name = "token",
+            default = "",
+            fuzzer = {}
+         }
       }
    },
 
+   --------------------------------------------------------------------
+   --
+   --------------------------------------------------------------------
    get_is_tx_blacklisted = {
       scan = "fuzzer",
       method = "get",
-      path = { "is_tx_blacklisted", { arg_name = "tx_id"} }
+      path = {
+         "is_tx_blacklisted",
+         {
+            arg_name = "tx_id",
+            default = "",
+            fuzzer = {}
+         }
+      }
    },
 
+   --------------------------------------------------------------------
+   --
+   --------------------------------------------------------------------
    get_price2_size = {
       scan = "fuzzer",
       method = "get",
-      path = { "price", { arg_name = "size" } },
-      path_default = {
-         size = ""
+      path = {
+         "price",
+         {
+            arg_name = "size",
+            default = "",
+            fuzzer = {}
+         }
       }
    },
 
+   --------------------------------------------------------------------
+   --
+   --------------------------------------------------------------------
    get_price_size_addr = {
       scan = "fuzzer",
       method = "get",
-      path = { "price", { arg_name = "size" }, { arg_name = "address" } },
-      path_default = {
-         size = "",
-         address = ""
+      path = {
+         "price",
+         {
+            arg_name = "size",
+            default = "",
+            fuzzer = {}
+         },
+         {
+            arg_name = "address",
+            default = "",
+            fuzzer = {}
+         }
       }
    },
 
+   --------------------------------------------------------------------
+   --
+   --------------------------------------------------------------------
    get_price2_size_addr = {
       scan = "fuzzer",
       method = "get",
-      path = { "price2", { arg_name = "size" }, { arg_name = "address" } },
-      path_default = {
-         size = "",
-         address = ""
+      path = {
+         "price2",
+         {
+            arg_name = "size",
+            default = "",
+            fuzzer = {}
+         },
+         {
+            arg_name = "address",
+            default = "",
+            fuzzer = {}
+         }
       }
    },
 
+   --------------------------------------------------------------------
+   --
+   --------------------------------------------------------------------
    get_tx_ready_for_mining = {
       comment = "only available for testnet miners",
       method = "get",
       path = { "tx", "ready_for_mining" }
    },
 
+   --------------------------------------------------------------------
+   --
+   --------------------------------------------------------------------
    get_unconfirmed_tx = {
       scan = "fuzzer",
       method = "get",
-      path = { "unconfirmed_tx", { arg_name = "hash" } },
-      path_default = {
-         hash = ""
+      path = {
+         "unconfirmed_tx",
+         {
+            arg_name = "hash",
+            default = "",
+            fuzzer = {}
+         }
       }
    },
 
+   --------------------------------------------------------------------
+   --
+   --------------------------------------------------------------------
    get_unconfirmed_tx = {
       scan = "fuzzer",
       method = "get",
-      path = { "unconfirmed_tx2", { arg_name = "hash" } },
-      path_default = {
-         hash = ""
+      path = {
+         "unconfirmed_tx2",
+         {
+            arg_name = "hash",
+            default = "",
+            fuzzer = {}
+         }
       }
    },
 
+   --------------------------------------------------------------------
+   --
+   --------------------------------------------------------------------
    post_pool_cm_jobs = {
       scan = "default",
       method = "post",
       path = { "pool_cm_jobs" }
    },
 
+   --------------------------------------------------------------------
+   --
+   --------------------------------------------------------------------
    post_mine = {
       scan = "default",
       comment = "only activated for testnet miners",
@@ -965,7 +1496,7 @@ http_path = function(path_id)
 
          -- try to find the default argument used, in the end it could
          -- be a random value generated based on some specification.
-         local default_arg = api[path_id]["path_default"][name]
+         local default_arg = api[path_id][name]["default"]
 
          -- we create nmap argument path
          local arg_path = create_arg_path(path_id, name)
@@ -1139,6 +1670,7 @@ is_gateway = function(host, port)
    if string.find(output.body.network, "^arweave") then
       return output
    end
+   return nil
 end
 
 ----------------------------------------------------------------------
@@ -1193,4 +1725,6 @@ action = function(host, port)
       return output
 
    end
+
+   return nil
 end
