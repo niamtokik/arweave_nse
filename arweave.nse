@@ -1,5 +1,4 @@
 ----------------------------------------------------------------------
---
 -- Copyright (c) 2024 Mathieu Kerjouan
 --
 -- Permission to use, copy, modify, and distribute this software for
@@ -154,8 +153,12 @@ local default_headers = {
 --  o [string]: static element
 --  o [table]: dynamic element
 --    o arg_name: the name of this variable
---    o default: the default value if not configured
---    o fuzzer: a function to generate this element
+--    o default (optional): the default value if not configured
+--    o fuzzer (optional): a function to generate this element
+--    o comment (optional):
+--    o type (optional):
+--    o source (optional): an URL where the value can be found
+--
 ----------------------------------------------------------------------
 local api = {
 
@@ -1462,6 +1465,30 @@ local api = {
    --    path = { "tx" }
    -- }
 }
+
+local etf_encode_small_atom_utf8_ext = function(value)
+   local buffer = [119]
+   if type(value) == "string" and #value<256 then
+      table.insert(buffer, #value)
+      for i in string.byte(value) do
+         table.insert(buffer, i)
+      end
+      return buffer
+   end
+   error("bad atom value")
+end
+
+local etf_encode_atom = function(term)
+   if term["t"] == "small" and term["value"] then
+      local buffer = []
+   end
+end
+
+local etf_encode = function(term)
+   local buffer = [131]
+   for key, value in ipairs(term) do
+   end
+end
 
 ----------------------------------------------------------------------
 -- full scan generated with the key present in api data structure
