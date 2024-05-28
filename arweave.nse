@@ -127,10 +127,32 @@ categories = {"default", "discovery", "safe", "version"}
 portrule = shortport.port_or_service(1984, "arweave", "tcp", "open")
 
 ----------------------------------------------------------------------
--- default header used
+-- extra supported http headers found in arweave source code
 ----------------------------------------------------------------------
-local default_headers = {
-   {"content-type", "application/json"}
+local supported_headers = {
+   "authorization",
+   "address",
+   "anchor",
+   "arweave-block-hash",
+   "arweave-data-root",
+   "arweave-data-size",
+   "arweave-recall-byte",
+   "arweave-tx-id",
+   "content-type",
+   "endpoint",
+   "modseq",
+   "price",
+   "signature",
+   "timeout",
+   "worker",
+   "x-bucket-based-offset",
+   "x-cm-api-secret",
+   "x-internal-api-secret",
+   "x-network",
+   "x-p2p-port",
+   "x-packing",
+   "x-pool-api-key",
+   "x-release",
 }
 
 ----------------------------------------------------------------------
@@ -206,7 +228,11 @@ local api = {
    get_chunk = {
       scan = "default",
       method = "get",
-      path = { "chunk" }
+      path = { "chunk" },
+      headers = {
+         "x-packing",
+         "x-bucket-based-offset"
+      }
    },
 
    --------------------------------------------------------------------
@@ -215,7 +241,11 @@ local api = {
    get_chunk2 = {
       scan = "default",
       method = "get",
-      path = { "chunk2" }
+      path = { "chunk2" },
+      headers = {
+         "x-packing",
+         "x-bucket-based-offset"
+      }
    },
 
    --------------------------------------------------------------------
@@ -224,9 +254,93 @@ local api = {
    get_chunk_proof = {
       scan = "default",
       method = "get",
-      path = { "chunk_proof" }
+      path = { "chunk_proof" },
+      headers = {
+         "x-packing",
+         "x-bucket-based-offset"
+      }
    },
 
+   --------------------------------------------------------------------
+   -- no params
+   --------------------------------------------------------------------
+   get_chunk_offset = {
+      scan = "fuzzer",
+      method = "get",
+      path = {
+         "chunk",
+         {
+            arg_name = "offset",
+            default = "",
+            fuzzer = {}
+         }
+      },
+      headers = {
+         "x-packing",
+         "x-bucket-based-offset"
+      }
+   },
+
+   --------------------------------------------------------------------
+   -- no params
+   --------------------------------------------------------------------
+   get_chunk_proof_offset = {
+      scan = "fuzzer",
+      method = "get",
+      path = {
+         "chunk_proof",
+         {
+            arg_name = "offset",
+            default = "",
+            fuzzer = {}
+         }
+      },
+      headers = {
+         "x-packing",
+         "x-bucket-based-offset"
+      }
+   },
+
+   --------------------------------------------------------------------
+   -- no params
+   --------------------------------------------------------------------
+   get_chunk_proof_offset = {
+      scan = "fuzzer",
+      method = "get",
+      path = {
+         "chunk2",
+         {
+            arg_name = "offset",
+            default = "",
+            fuzzer = {}
+         }
+      },
+      headers = {
+         "x-packing",
+         "x-bucket-based-offset"
+      }
+   },
+
+   --------------------------------------------------------------------
+   -- no params
+   --------------------------------------------------------------------
+   get_chunk_proof2_offset = {
+      scan = "fuzzer",
+      method = "get",
+      path = {
+         "chunk_proof2",
+         {
+            arg_name = "offset",
+            default = "",
+            fuzzer = {}
+         }
+      },
+      headers = {
+         "x-packing",
+         "x-bucket-based-offset"
+      }
+   },
+   
    --------------------------------------------------------------------
    -- no params
    --------------------------------------------------------------------
@@ -261,7 +375,10 @@ local api = {
    get_data_sync_record = {
       scan = "default",
       method = "get",
-      path = { "data_sync_record" }
+      path = { "data_sync_record" },
+      headers = {
+         "content-type"
+      }
    },
 
    --------------------------------------------------------------------
@@ -678,11 +795,17 @@ local api = {
 
    --------------------------------------------------------------------
    -- ok: arweave.post_block2.body = ""
+   -- wip: arweave.post_block2.headers.arweave-block-hash = ""
+   -- wip: arweave.post_block2.headers.arweave-recall-byte = ""
    --------------------------------------------------------------------
    post_post_block2 = {
       scan = "full",
       method = "post",
       path = { "block2" },
+      headers = {
+         "arweave-block-hash",
+         "arweave-recall-byte"
+      }
    },
 
    --------------------------------------------------------------------
@@ -701,6 +824,10 @@ local api = {
       scan = "full",
       method = "post",
       path = { "block" },
+      headers = {
+         "arweave-block-hash",
+         "arweave-recall-byte"
+      }
    },
 
    --------------------------------------------------------------------
@@ -710,6 +837,10 @@ local api = {
       scan = "full",
       method = "post",
       path = { "chunk" },
+      headers = {
+         "arweave-data-root",
+         "arweave-data-size"
+      }
    },
 
    --------------------------------------------------------------------
@@ -745,7 +876,11 @@ local api = {
    post_partial_solution = {
       scan = "full",
       method = "post",
-      path = { "partial_solution" }
+      path = { "partial_solution" },
+      headers = {
+         "x-internal-api-secret",
+         "x-cm-api-secret"         
+      }
    },
 
    --------------------------------------------------------------------
@@ -764,7 +899,10 @@ local api = {
       scan = "full",
       comment = "return json encoded transaction",
       method = "post",
-      path = { "tx" }
+      path = { "tx" },
+      headers = {
+         "arweave-tx-id"
+      }
    },
 
    --------------------------------------------------------------------
@@ -774,7 +912,10 @@ local api = {
       scan = "full",
       comment = "return binary encoded transaction",
       method = "post",
-      path = { "tx2" }
+      path = { "tx2" },
+      headers = {
+         "arweave-tx-id"
+      }
    },
 
    --------------------------------------------------------------------
@@ -783,7 +924,10 @@ local api = {
    post_unsigned_tx = {
       scan = "full",
       method = "post",
-      path = { "unsigned_tx" }
+      path = { "unsigned_tx" },
+      headers = {
+         "arweave-tx-id"
+      }
    },
 
    --------------------------------------------------------------------
@@ -1280,6 +1424,9 @@ local api = {
             default = "",
             fuzzer = {}
          }
+      },
+      header = {
+         "content-type"
       }
    },
 
@@ -1466,30 +1613,6 @@ local api = {
    -- }
 }
 
-local etf_encode_small_atom_utf8_ext = function(value)
-   local buffer = [119]
-   if type(value) == "string" and #value<256 then
-      table.insert(buffer, #value)
-      for i in string.byte(value) do
-         table.insert(buffer, i)
-      end
-      return buffer
-   end
-   error("bad atom value")
-end
-
-local etf_encode_atom = function(term)
-   if term["t"] == "small" and term["value"] then
-      local buffer = []
-   end
-end
-
-local etf_encode = function(term)
-   local buffer = [131]
-   for key, value in ipairs(term) do
-   end
-end
-
 ----------------------------------------------------------------------
 -- full scan generated with the key present in api data structure
 ----------------------------------------------------------------------
@@ -1553,7 +1676,7 @@ end
 ----------------------------------------------------------------------
 -- wrapper around http request for get
 ----------------------------------------------------------------------
-http_request = function(host, port, path_id)
+http_request = function(host, port, path_id, options)
    local output = stdnse.output_table()
    local method = api[path_id]["method"]
    local path = http_path(path_id)
@@ -1568,7 +1691,7 @@ http_request = function(host, port, path_id)
    -- get method, assume the content returned is json by default.
    --------------------------------------------------------------------
    if method == "get" then
-      response = http.get(host, port, path)
+      response = http.get(host, port, path, options)
 
       -- if no response returns nil
       if not(response) then
@@ -1602,7 +1725,7 @@ http_request = function(host, port, path_id)
    -- head method, returns only headers
    --------------------------------------------------------------------
    if method == "head" then
-      response = http.head(host, port, path)
+      response = http.head(host, port, path, options)
 
       if not(response) then
          return nil
@@ -1623,7 +1746,7 @@ http_request = function(host, port, path_id)
       -- empty
       local body_arg_path = create_arg_path(path_id, "body")
       local body = stdnse.get_script_args(body_arg_path) or ""
-      response = http.post(host, port, path, {}, {}, body)
+      response = http.post(host, port, path, options, {}, body)
 
       if not(response) then
          return nil
@@ -1651,7 +1774,7 @@ http_request = function(host, port, path_id)
       -- empty
       local body_arg_path = create_arg_path(path_id, "body")
       local body = stdnse.get_script_args(body_arg_path) or ""
-      response = http.put(host, port, path, {}, {}, body)
+      response = http.put(host, port, path, options, {}, body)
 
       if not(response) then
          return nil
@@ -1724,10 +1847,11 @@ action = function(host, port)
       local scan = stdnse.get_script_args("arweave.scan") or "default"
       local scan_only = stdnse.get_script_args("arweave.scan_only") or nil
       local scan_filter = stdnse.get_script_args("arweave.scan_filter") or nil
+      local options = stdnse.get_script_args("arweave.headers") or {}
 
       -- scan only one path from api
       if scan_only and api[scan_only] then
-         result = http_request(host, port, scan_only)
+         result = http_request(host, port, scan_only, options)
          output[scan_only] = result
          return output
       end
