@@ -80,6 +80,12 @@ flag.
    - [ ] Simple ETF parser
    - [ ] Simple ETF serializer
    - [ ] Automatic code injection
+ - [ ] Other features to add:
+   - [ ] CORS headers check
+   - [ ] Comments/details regarding a port
+   - [ ] custom state for each end-point
+   - [ ] Version fingerprinting (e.g. add score in each end-point, seen on each version...)
+   - [ ] external service notification support
 
 # References and resources
 

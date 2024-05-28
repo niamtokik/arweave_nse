@@ -188,6 +188,7 @@ local api = {
    -- no params
    get_current_block = {
       scan = "full",
+      comment = "deprecated",
       method = "get",
       path = { "current_block" }
    },
@@ -198,6 +199,7 @@ local api = {
       method = "get",
       path = { "data_sync_record" }
    },
+
 
    -- no params
    get_height = {
@@ -230,6 +232,7 @@ local api = {
    -- no params
    get_queue = {
       scan = "default",
+      comment = "deprecated end-point",
       method = "get",
       path = { "queue" }
    },
@@ -547,6 +550,7 @@ local api = {
    -- ok: arweave.post_tx.body = ""
    post_tx = {
       scan = "full",
+      comment = "return json encoded transaction",
       method = "post",
       path = { "tx" }
    },
@@ -554,6 +558,7 @@ local api = {
    -- ok: arweave.post_tx2.body = ""
    post_tx2 = {
       scan = "full",
+      comment = "return binary encoded transaction",
       method = "post",
       path = { "tx2" }
    },
@@ -579,7 +584,331 @@ local api = {
       scan = "full",
       method = "post",
       path = { "wallet" }
-   }
+   },
+
+   get_block_index_from_to = {
+      scan = "fuzzer",
+      method = "get",
+      path = { "block_index", { arg_name = "from" }, { arg_name = "to" } },
+      path_default = {
+         from = "",
+         to = ""
+      }
+   },
+
+   get_block_index2_from_to = {
+      scan = "fuzzer",
+      method = "get",
+      path = { "block_index2", { arg_name = "from" }, { arg_name = "to" } },
+      path_default = {
+         from = "",
+         to = ""
+      }
+   },
+
+   get_block_current = {
+      scan = "full",
+      method = "get",
+      path = { "block", "current" }
+   },
+
+   get_data_sync_record_start_limit = {
+      scan = "fuzzer",
+      method = "get",
+      path = { "data_sync_record", { arg_name = "start"}, { arg_name = "limit" } },
+      path_default = {
+         start = "",
+         limit = ""
+      }
+   },
+
+   get_recent_hash_list = {
+      scan = "default",
+      method = "get",
+      path = { "recent_hash_list" }
+   },
+
+   get_hash_list = {
+      scan = "default",
+      method = "get",
+      path = { "hash_list" }
+   },
+
+   get_hash_list_from_to = {
+      scan = "fuzzer",
+      method = "get",
+      path = { "hash_list", { arg_name = "from" }, { arg_name = "to" } },
+      path_default = {
+         from = "",
+         to = ""
+      }
+   },
+
+   get_hash_list2_from_to = {
+      scan = "fuzzer",
+      method = "get",
+      path = { "hash_list2", { arg_name = "from" }, { arg_name = "to" } },
+      path_default = {
+         from = "",
+         to = ""
+      }
+   },
+
+   get_jobs_output = {
+      scan = "fuzzer",
+      method = "get",
+      path = { "jobs", { arg_name = "prev_output" } },
+      path_default = {
+         prev_output = ""
+      }
+   },
+
+      get_wallet_list_hash = {
+      scan = "fuzzer",
+      method = "get",
+      path = { "wallet_list", { arg_name = "hash" } },
+      path_default = {
+         hash = ""
+      }
+   },
+
+   get_wallet_list_hash_cursor = {
+      scan = "fuzzer",
+      method = "get",
+      path = { "wallet_list", { arg_name = "hash" }, { arg_name = "cursor" } },
+      path_default = {
+         hash = "",
+         cursor = ""
+      }
+   },
+
+   get_wallet_list_hash_address_balance = {
+      scan = "fuzzer",
+      method = "get",
+      path = { "wallet_list", { arg_name = "hash" }, { arg_name = "address" }, "balance" },
+      path_default = {
+         hash = "",
+         address = ""
+      }
+   },
+
+   get_wallet_address_balance = {
+      scan = "fuzzer",
+      method = "get",
+      path = { "wallet", { arg_name = "address" }, "balance" },
+      path_default = {
+         address = ""
+      }
+   },
+
+   get_wallet_address_reserved_rewards_total = {
+      scan = "fuzzer",
+      method = "get",
+      path = { "wallet", { arg_name = "address" }, "reserved_rewards_total" },
+      path_default = {
+         address = ""
+      }
+   },
+
+   get_wallet_address_last_tx = {
+      scan = "fuzzer",
+      method = "get",
+      path = { "wallet", { arg_name = "address" }, "last_tx" },
+      path_default = {
+         address = ""
+      }
+   },
+
+   get_inflation_height = {
+      scan = "fuzzer",
+      method = "get",
+      path = { "inflation", { arg_name = "height" } },
+      path_default = {
+         height = ""
+      }
+   },
+
+   get_optimistic_price_size = {
+      scan = "fuzzer",
+      method = "get",
+      path = { "optimistic_price", { arg_name = "size" } },
+      path_default = {
+         size = ""
+      }
+   },
+
+   get_optimistic_price_size_address = {
+      scan = "fuzzer",
+      method = "get",
+      path = { "optimistic_price", { arg_name = "size" }, { arg_name = "address" } },
+      path_default = {
+         size = "",
+         address = ""
+      }
+   },
+
+   get_v2price_size_address = {
+      scan = "fuzzer",
+      method = "get",
+      path = { "v2price", { arg_name = "size" }, { arg_name = "address" } },
+      path_default = {
+         size = "",
+         address = ""
+      }
+   },
+
+   get_reward_history_bh = {
+      scan = "fuzzer",
+      method = "get",
+      path = { "reward_history", { arg_name = "bh" } },
+      path_default = {
+         bh = ""
+      }
+   },
+
+   get_block_time_history_bh = {
+      scan = "fuzzer",
+      method = "get",
+      path = { "block_time_history", { arg_name = "bh" } },
+      path_default = {
+         bh = ""
+      }
+   },
+
+   get_block_type_id = {
+      scan = "fuzzer",
+      method = "get",
+      path = { "block", { arg_name = "type" }, { arg_name = "id" } },
+      path_default = {
+         type = "",
+         id = ""
+      }
+   },
+
+   get_block_type_id_field = {
+      scan = "fuzzer",
+      method = "get",
+      path = { "block", { arg_name = "type" }, { arg_name = "id" }, { arg_name = "field" } },
+      path_default = {
+         type = "",
+         id = "",
+         field = ""
+      }
+   },
+
+   get_block2_type_id = {
+      scan = "fuzzer",
+      method = "get",
+      path = { "block2", { arg_name = "type" }, { arg_name = "id" } },
+      path_default = {
+         type = "",
+         id = ""
+      }
+   },
+
+   get_block_height_wallet_address_balance = {
+      scan = "fuzzer",
+      method = "get",
+      path = { "block", "height", { arg_name = "height" }, "wallet", { arg_name = "address" }, "balance" },
+      path_default = {
+         height = "",
+         address = ""
+      }
+   },
+
+   get_tx_hash_field = {
+      scan = "fuzzer",
+      method = "get",
+      path = { "tx", { arg_name = "hash" }, { arg_name = "field" } },
+      path_default = {
+         hash = "",
+         field = ""
+      }
+   },
+
+   get_balance_address_network_token = {
+      scan = "fuzzer",
+      method = "get",
+      path = { "balance", { arg_name = "address" }, { arg_name = "network" }, { arg_name = "token" } },
+      path_default = {
+         address = "",
+         network = "",
+         token = ""
+      }
+   },
+
+   get_is_tx_blacklisted = {
+      scan = "fuzzer",
+      method = "get",
+      path = { "is_tx_blacklisted", { arg_name = "tx_id"} }
+   },
+
+   get_price2_size = {
+      scan = "fuzzer",
+      method = "get",
+      path = { "price", { arg_name = "size" } },
+      path_default = {
+         size = ""
+      }
+   },
+
+   get_price_size_addr = {
+      scan = "fuzzer",
+      method = "get",
+      path = { "price", { arg_name = "size" }, { arg_name = "address" } },
+      path_default = {
+         size = "",
+         address = ""
+      }
+   },
+
+   get_price2_size_addr = {
+      scan = "fuzzer",
+      method = "get",
+      path = { "price2", { arg_name = "size" }, { arg_name = "address" } },
+      path_default = {
+         size = "",
+         address = ""
+      }
+   },
+
+   get_tx_ready_for_mining = {
+      comment = "only available for testnet miners",
+      method = "get",
+      path = { "tx", "ready_for_mining" }
+   },
+
+   get_unconfirmed_tx = {
+      scan = "fuzzer",
+      method = "get",
+      path = { "unconfirmed_tx", { arg_name = "hash" } },
+      path_default = {
+         hash = ""
+      }
+   },
+
+   get_unconfirmed_tx = {
+      scan = "fuzzer",
+      method = "get",
+      path = { "unconfirmed_tx2", { arg_name = "hash" } },
+      path_default = {
+         hash = ""
+      }
+   },
+
+   post_pool_cm_jobs = {
+      scan = "default",
+      method = "post",
+      path = { "pool_cm_jobs" }
+   },
+
+   post_mine = {
+      scan = "default",
+      comment = "only activated for testnet miners",
+      method = "post",
+      path = { "mine" }
+   },
+
 
    -- wip: arweave.options_block.fuzzing = true | false
    -- options_block = {
