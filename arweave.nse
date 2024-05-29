@@ -232,13 +232,42 @@ local supported_headers = {
 local api = {
 
    --------------------------------------------------------------------
-   -- no params.
+   -- no params. used to identify if the node is an active arweave
+   -- node
    --------------------------------------------------------------------
-   root = {
+   get_root = {
       comment = "default path (/) used to evaluate the server.",
       scan = "init",
       method = "get",
       path = {}
+   },
+
+   --------------------------------------------------------------------
+   -- no params
+   --------------------------------------------------------------------
+   get_info = {
+      scan = "default",
+      method = "get",
+      path = { "info" }
+   },
+
+   --------------------------------------------------------------------
+   -- no params. used to identify if the target is an arweave node.
+   --------------------------------------------------------------------
+   head_root = {
+      comment = "",
+      scan = "init",
+      method = "head",
+      path = {}
+   },
+
+   --------------------------------------------------------------------
+   -- no params. used to identify if the target is an arweave node.
+   --------------------------------------------------------------------
+   head_info = {
+      scan = "init",
+      method = "head",
+      path = { "info" }
    },
 
    --------------------------------------------------------------------
@@ -448,15 +477,6 @@ local api = {
    --------------------------------------------------------------------
    -- no params
    --------------------------------------------------------------------
-   get_info = {
-      scan = "default",
-      method = "get",
-      path = { "info" }
-   },
-
-   --------------------------------------------------------------------
-   -- no params
-   --------------------------------------------------------------------
    get_jobs = {
       scan = "default",
       method = "get",
@@ -606,24 +626,6 @@ local api = {
       scan = "default",
       method = "get",
       path = { "wallet_list" }
-   },
-
-   --------------------------------------------------------------------
-   -- no params
-   --------------------------------------------------------------------
-   head_root = {
-      scan = "full",
-      method = "head",
-      path = {}
-   },
-
-   --------------------------------------------------------------------
-   -- no params
-   --------------------------------------------------------------------
-   head_info = {
-      scan = "full",
-      method = "head",
-      path = { "info" }
    },
 
    --------------------------------------------------------------------
@@ -1761,9 +1763,10 @@ local api = {
 }
 
 ----------------------------------------------------------------------
--- dirty way to have rfc4846 base64 compatible, just replace the
--- characters... It should work for a big part of values, will do
+-- dirty way to have rfc4846 base64 using classic base64, just replace
+-- the characters... It should work for a big part of values, will do
 -- the job for the moment.
+--
 -- @param s string
 -- @return string as base64
 ----------------------------------------------------------------------
@@ -1794,6 +1797,9 @@ end
 ----------------------------------------------------------------------
 -- wip: this script needs to return different kind of number, in
 -- different format and in different bases.
+--
+-- @usage
+-- @return
 ----------------------------------------------------------------------
 local fuzzer_number = function(params)
    -- the size of random data in bytes
@@ -1821,7 +1827,8 @@ local fuzzer_number = function(params)
 end
 
 ----------------------------------------------------------------------
--- convert a table made of string and table into a path
+-- convert a table made of string and table into a path.
+--
 -- @param path_id the key from api table
 -- @return string a formatted end-point
 ----------------------------------------------------------------------
@@ -1865,6 +1872,7 @@ end
 ----------------------------------------------------------------------
 -- create arweave argument path
 -- create_arg_path("id", "name") => arweave.id.name
+--
 -- @param path_id a key from api table
 -- @param name a string
 -- @return string
@@ -1875,7 +1883,8 @@ local create_arg_path = function(path_id, name)
 end
 
 ----------------------------------------------------------------------
--- wrapper around http request for get
+-- wrapper around http request for get.
+--
 -- @param host nmap host structure
 -- @param port nmap port structure
 -- @param path_id a key from api table
@@ -2004,31 +2013,57 @@ local http_request = function(host, port, path_id, options)
 end
 
 ----------------------------------------------------------------------
--- returns true if it's a gateway or a miner, else false. To do that,
--- this function analyze the JSON object returned by / using get
--- method.
+-- returns a value if it's a gateway or a miner, else false. To do
+-- that, this function analyze the JSON object returned by / using get
+-- method. This is a really simple function but it executes 4
+-- requests. Indeed, an arweave node can be identified with head or
+-- get request. This is not clean, but this is quite accurate. get /
+-- and /info are both working in theory.
+--
 -- @param host nmap host structure
 -- @param port nmap port structure
 -- @return output or nil
 ----------------------------------------------------------------------
 local is_gateway = function(host, port)
-   local output = http_request(host, port, "root")
+   local get_root  = http_request(host, port, "get_root")
+   local get_info  = http_request(host, port, "get_info")
+   local head_root = http_request(host, port, "head_root")
+   local head_info = http_request(host, port, "head_info")
 
-   if output.http_status ~= 200 then
+   -- check if they are returning code 200
+   if (get_root.http_status  ~= 200) or
+      (get_info.http_status  ~= 200) or
+      (head_root.http_status ~= 200) or
+      (head_info.http_status ~= 200) then
       return nil
    end
-   if not(output.body.version) then
+
+   -- check if one of these request return a version;
+   if not(get_root.body.version) or
+      not(get_info.body.version) then
       return nil
    end
-   if not(output.body.release) then
+
+   -- check if the release is present;
+   if not(get_root.body.release) or
+      not(get_info.body.release) then
       return nil
    end
-   if not(output.body.network) then
+
+   -- check if network is present;
+   if not(get_root.body.network) or
+      not(get_info.body.network) then
       return nil
    end
-   if string.find(output.body.network, "^arweave") then
-      return output
+
+   -- if network is a string containing arweave, then that's probably
+   -- an arweave node.
+   if string.find(get_root.body.network, "^arweave") or
+      string.find(get_info.body.network, "^arweave") then
+      return get_info or get_root
    end
+
+   -- else we assume this server is not an arweave node.
    return nil
 end
 
@@ -2039,6 +2074,7 @@ portrule = shortport.port_or_service(1984, "arweave", "tcp", "open")
 
 ----------------------------------------------------------------------
 -- entry point
+--
 -- @param host nmap host structure
 -- @param port nmap port structure
 -- @return output or nil
