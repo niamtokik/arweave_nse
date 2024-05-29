@@ -1761,6 +1761,22 @@ local api = {
 }
 
 ----------------------------------------------------------------------
+-- dirty way to have rfc4846 base64 compatible, just replace the
+-- characters... It should work for a big part of values, will do
+-- the job for the moment.
+-- @param s string
+-- @return string as base64
+----------------------------------------------------------------------
+local base64_enc = function(s)
+   local base64 = require "base64"
+   local output = base64.enc(s)
+   output = string.gsub(output, "/", "_")
+   output = string.gsub(output, "+", "-")
+   output = string.gsub(output, "=", "")
+   return output
+end
+
+----------------------------------------------------------------------
 -- wip: fuzzer function to generate random values and inject them.  it
 -- needs to support random number generate, and the output shoud be in
 -- hex, base10 or base64.
