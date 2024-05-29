@@ -37,7 +37,7 @@ flag.
  - [x] HTTP POST method with path parameters and configured body
  - [x] HTTP PUT method with path parameters and configured body
  - [ ] ~~HTTP OPTIONS method~~ (not supported by default nmap library)
- - [ ] Randomized Scanner
+ - [ ] Randomized Scanner end-point
  - [ ] Add arguments supports:
    - [ ] `arweave.http_header_content_type="application/json"`
    - [ ] `arweave.randomize=true`: randomize path scan
@@ -86,6 +86,8 @@ flag.
    - [ ] custom state for each end-point
    - [ ] Version fingerprinting (e.g. add score in each end-point, seen on each version...)
    - [ ] external service notification support
+   - [ ] add risks evaluation on each end-point
+   - [ ] includes default bearer/api_secret in the API
 
 # References and resources
 

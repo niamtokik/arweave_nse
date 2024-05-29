@@ -29,82 +29,127 @@
 --
 -- -------------------------------------------------------------------
 --
--- Usage: nmap -p 1984 --script=arweave.nse
---
--- https://ar-io.dev/api-docs/
--- https://docs.ar.io/gateways/ar-io-node/admin/admin-api.html#overview
---
--- -------------------------------------------------------------------
+-- @see https://ar-io.dev/api-docs/
+-- @see https://docs.ar.io/gateways/ar-io-node/admin/admin-api.html#overview
+-- @usage nmap --script=arweave.nse [--script-args=<Args>] <targets>
+-- @usage nmap --script=+arweave.nse -p <port> [--script-args=<Args>] <targets>
+-- @args arweave.scan (optional)
+-- @args arweave.scan_only (optional)
+-- @args arweave.scan_filter (optional)
+-- @args arweave.headers (optional)
+-- @args arweave.get_balance_address_network_token.address (optional)
+-- @args arweave.get_balance_address_network_token.network (optional)
+-- @args arweave.get_balance_address_network_token.token (optional)
+-- @args arweave.get_block2_type_id.id (optional)
+-- @args arweave.get_block2_type_id.type (optional)
+-- @args arweave.get_block_hash.hash (optional)
+-- @args arweave.get_block_height.height (optional)
+-- @args arweave.get_block_height_wallet_address_balance.address (optional)
+-- @args arweave.get_block_height_wallet_address_balance.height (optional)
+-- @args arweave.get_block_index2_from_to.from (optional)
+-- @args arweave.get_block_index2_from_to.to (optional)
+-- @args arweave.get_block_index_from_to.from (optional)
+-- @args arweave.get_block_index_from_to.to (optional)
+-- @args arweave.get_block_time_history_bh.bh (optional)
+-- @args arweave.get_block_type_id.id (optional)
+-- @args arweave.get_block_type_id.type (optional)
+-- @args arweave.get_block_type_id_field.field (optional)
+-- @args arweave.get_block_type_id_field.id (optional)
+-- @args arweave.get_block_type_id_field.type (optional)
+-- @args arweave.get_chunks.offset (optional)
+-- @args arweave.get_data_sync_record_start_limit.limit (optional)
+-- @args arweave.get_data_sync_record_start_limit.start (optional)
+-- @args arweave.get_farcaster_frame_tx.tx_id (optional)
+-- @args arweave.get_hash_list2_from_to.from (optional)
+-- @args arweave.get_hash_list2_from_to.to (optional)
+-- @args arweave.get_hash_list_from_to.from (optional)
+-- @args arweave.get_hash_list_from_to.to (optional)
+-- @args arweave.get_inflation_height.height (optional)
+-- @args arweave.get_is_tx_blacklisted.tx_id (optional)
+-- @args arweave.get_jobs_output.prev_output (optional)
+-- @args arweave.get_optimistic_price_size.size (optional)
+-- @args arweave.get_optimistic_price_size_address.address (optional)
+-- @args arweave.get_optimistic_price_size_address.size (optional)
+-- @args arweave.get_price2_size.size (optional)
+-- @args arweave.get_price2_size_addr.address (optional)
+-- @args arweave.get_price2_size_addr.size (optional)
+-- @args arweave.get_price_size.size (optional)
+-- @args arweave.get_price_size_addr.address (optional)
+-- @args arweave.get_price_size_addr.size (optional)
+-- @args arweave.get_price_size_target.size (optional)
+-- @args arweave.get_reward_history_bh.bh (optional)
+-- @args arweave.get_tx.tx_id (optional)
+-- @args arweave.get_tx_hash_field.field (optional)
+-- @args arweave.get_tx_hash_field.hash (optional)
+-- @args arweave.get_tx_offset.tx_id (optional)
+-- @args arweave.get_tx_state.tx_id (optional)
+-- @args arweave.get_unconfirmed_tx.hash (optional)
+-- @args arweave.get_v2price_size_address.address (optional)
+-- @args arweave.get_v2price_size_address.size (optional)
+-- @args arweave.get_wallet_address_balance.address (optional)
+-- @args arweave.get_wallet_address_last_tx.address (optional)
+-- @args arweave.get_wallet_address_reserved_rewards_total.address (optional)
+-- @args arweave.get_wallet_balance.address (optional)
+-- @args arweave.get_wallet_last_tx.address (optional)
+-- @args arweave.get_wallet_list_hash.hash (optional)
+-- @args arweave.get_wallet_list_hash_address_balance.address (optional)
+-- @args arweave.get_wallet_list_hash_address_balance.hash (optional)
+-- @args arweave.get_wallet_list_hash_cursor.cursor (optional)
+-- @args arweave.get_wallet_list_hash_cursor.hash (optional)
+-- @args arweave.post_admin_queue_tx.body (optional)
+-- @args arweave.post_block.body (optional)
+-- @args arweave.post_block2.body (optional)
+-- @args arweave.post_block_announcement.body (optional)
+-- @args arweave.post_coordinated_mining_h1.body (optional)
+-- @args arweave.post_coordinated_mining_h2.body (optional)
+-- @args arweave.post_farcaster_frame_tx.body (optional)
+-- @args arweave.post_farcaster_frame_tx.tx_id (optional)
+-- @args arweave.post_height.body (optional)
+-- @args arweave.post_mine.body (optional)
+-- @args arweave.post_partial_solution.body (optional)
+-- @args arweave.post_peers.body (optional)
+-- @args arweave.post_pool_cm_jobs (optional)
+-- @args arweave.post_tx.body (optional)
+-- @args arweave.post_tx2.body (optional)
+-- @args arweave.post_unsigned_tx.body (optional)
+-- @args arweave.post_vdf.body (optional)
+-- @args arweave.post_wallet.body (optional)
+-- @args arweave.put_admin_block_data.body (optional)
 --
 -- @output
 -- PORT     STATE SERVICE
--- 1984/tcp open  bigbrother
---    | arweave:
---    |   default:
---    |     http_path: /
---    |     http_method: get
---    |     http_status: 200
---    |     parsed:
---    |       queue_length: 0
---    |       network: arweave.N.1
---    |       peers: 507
---    |       height: 1430736
---    |       node_state_latency: 2
---    |       blocks: 538557
---    |       current: R-ezq9VMxr03nF7-IvvLRpp8UfHjMCDBlSTI_c2Yc1o9ZHVNs4bFjQ8eHSuAa8Ke
---    |       version: 5
---    |       release: 69
---    |   info:
---    |     http_path: /info
---    |     http_method: get
---    |     http_status: 200
---    |     parsed:
---    |       queue_length: 0
---    |       network: arweave.N.1
---    |       peers: 507
---    |       height: 1430736
---    |       node_state_latency: 6
---    |       blocks: 538557
---    |       current: R-ezq9VMxr03nF7-IvvLRpp8UfHjMCDBlSTI_c2Yc1o9ZHVNs4bFjQ8eHSuAa8Ke
---    |       version: 5
---    |       release: 69
---    |   peers:
---    |     http_path: /peers
---    |     http_method: get
---    |     http_status: 200
---    |     parsed:
---    |       18.138.235.138:1984
---    |       178.128.89.236:1984
---    |       38.29.227.23:1984
---    |       13.251.3.199:1984
---    |       54.92.124.113:1984
---    |       72.255.241.138:1988
---    |       174.112.132.234:1985
---    |       162.220.53.21:1984
---    |       216.66.68.20:1984
---    |       47.251.16.180:1984
---    |       109.120.235.125:35120
---    |       18.141.221.62:1984
---    |       162.55.176.19:1984
---    |   time:
---    |     http_path: /time
---    |     http_method: get
---    |     http_status: 200
---    |     parsed: 1716549057
---    |   rates:
---    |     http_path: /rates
---    |     http_method: get
---    |     http_status: 200
---    |     parsed:
---    |       payment_methods:
---    |_      endpoints:
---
--- Nmap done: 1 IP address (1 host up) scanned in 2.27 seconds
+-- 1984/tcp open  arweave
+-- | arweave:
+-- |   get_block_index:
+-- |     http_path_id: get_block_index
+-- |     http_path: /block_index
+-- |     http_method: get
+-- |     http_status: 400
+-- |     headers:
+-- |       date: Wed, 29 May 2024 18:15:24 GMT
+-- |       server: Cowboy
+-- |       content-length: 40
+-- |       access-control-allow-origin: *
+-- |       connection: close
+-- |   get_total_supply:
+-- |     http_path_id: get_total_supply
+-- |     http_path: /total_supply
+-- |     http_method: get
+-- |     http_status: 200
+-- |     headers:
+-- |       date: Wed, 29 May 2024 18:15:26 GMT
+-- |       server: Cowboy
+-- |       content-length: 20
+-- |       access-control-allow-origin: *
+-- |       connection: close
+-- |_    body: 6.5651199163473e+19
+-- Nmap done: 1 IP address (1 host up) scanned in 55.87 seconds
 --
 -- @TODO add fuzzer support
 -- @TODO add application/etf support
 -- @TODO randomize api table before scanning
 -- @TODO add header support
+-- @TODO add default values found in testing
 --
 ----------------------------------------------------------------------
 local nmap = require "nmap"
@@ -114,6 +159,7 @@ local comm = require "comm"
 local shortport = require "shortport"
 local stdnse = require "stdnse"
 local rand = require "rand"
+local openssl = require "openssl"
 
 ----------------------------------------------------------------------
 -- default information for nmap engine
@@ -124,12 +170,13 @@ description = [[
 Idendify and collect information about arweave gateways and miners.
 ]]
 categories = {"default", "discovery", "safe", "version"}
-portrule = shortport.port_or_service(1984, "arweave", "tcp", "open")
 
 ----------------------------------------------------------------------
 -- extra supported http headers found in arweave source code
 ----------------------------------------------------------------------
 local supported_headers = {
+   -- Bearer 123
+   -- Bearer 123456
    "authorization",
    "address",
    "anchor",
@@ -185,7 +232,7 @@ local supported_headers = {
 local api = {
 
    --------------------------------------------------------------------
-   -- no params
+   -- no params.
    --------------------------------------------------------------------
    root = {
       comment = "default path (/) used to evaluate the server.",
@@ -272,7 +319,9 @@ local api = {
          {
             arg_name = "offset",
             default = "",
-            fuzzer = {}
+            fuzzer = {
+               t = "number"
+            }
          }
       },
       headers = {
@@ -292,7 +341,9 @@ local api = {
          {
             arg_name = "offset",
             default = "",
-            fuzzer = {}
+            fuzzer = {
+               t = "number"
+            }
          }
       },
       headers = {
@@ -312,7 +363,9 @@ local api = {
          {
             arg_name = "offset",
             default = "",
-            fuzzer = {}
+            fuzzer = {
+               t = "number"
+            }
          }
       },
       headers = {
@@ -332,7 +385,9 @@ local api = {
          {
             arg_name = "offset",
             default = "",
-            fuzzer = {}
+            fuzzer = {
+               t = "number"
+            }
          }
       },
       headers = {
@@ -340,7 +395,7 @@ local api = {
          "x-bucket-based-offset"
       }
    },
-   
+
    --------------------------------------------------------------------
    -- no params
    --------------------------------------------------------------------
@@ -582,7 +637,9 @@ local api = {
          {
             arg_name = "size",
             default = "",
-            fuzzer = {}
+            fuzzer = {
+               t = "number"
+            }
          }
       }
    },
@@ -615,7 +672,11 @@ local api = {
          {
             arg_name = "address",
             default = "",
-            fuzzer = {}
+            fuzzer = {
+               t = "number",
+               size = 32,
+               base = 64
+            }
          },
          "balance"
       }
@@ -632,7 +693,11 @@ local api = {
          {
             arg_name = "address",
             default = "",
-            fuzzer = {}
+            fuzzer = {
+               t = "number",
+               size = 32,
+               base = 64
+            }
          },
          "last_tx"
       }
@@ -650,7 +715,11 @@ local api = {
          {
             arg_name = "height",
             default = "",
-            fuzzer = {}
+            fuzzer = {
+               t = "number",
+               size = 32,
+               base = 10
+            }
          }
       }
    },
@@ -667,7 +736,11 @@ local api = {
          {
             arg_name = "hash",
             default = "",
-            fuzzer = {}
+            fuzzer = {
+               t = "number",
+               size = 32,
+               base = 16
+            }
          }
       }
    },
@@ -683,7 +756,11 @@ local api = {
          {
             arg_name = "tx_id",
             default = "",
-            fuzzer = {}
+            fuzzer = {
+               t = "number",
+               size = 32,
+               base = 64
+            }
          }
       }
    },
@@ -699,7 +776,11 @@ local api = {
          {
             arg_name = "tx_id",
             default = "",
-            fuzzer = {}
+            fuzzer = {
+               t = "number",
+               size = 32,
+               base = 64
+            }
          },
          "offset"
       }
@@ -716,7 +797,11 @@ local api = {
          {
             arg_name = "tx_id",
             default = "",
-            fuzzer = {}
+            fuzzer = {
+               t = "number",
+               size = 32,
+               base = 64
+            }
          },
          "status"
       }
@@ -733,7 +818,9 @@ local api = {
          {
             arg_name = "offset",
             default = "",
-            fuzzer = {}
+            fuzzer = {
+               t = "number"
+            }
          }
       }
    },
@@ -744,7 +831,8 @@ local api = {
    post_admin_queue_tx = {
       scan = "full",
       method = "post",
-      path = { "ar-io", "admin", "queue-tx" }
+      path = { "ar-io", "admin", "queue-tx" },
+      body = ""
    },
 
    --------------------------------------------------------------------
@@ -753,7 +841,8 @@ local api = {
    put_admin_block_data = {
       scan = "full",
       method = "put",
-      path = { "ar-io", "admin", "block-data" }
+      path = { "ar-io", "admin", "block-data" },
+      body = ""
    },
 
    --------------------------------------------------------------------
@@ -769,14 +858,18 @@ local api = {
          {
             arg_name = "tx_id",
             default = "",
-            fuzzer = {}
+            fuzzer = {
+               t = "number",
+               size = 32,
+               base = 64
+            }
          }
       }
    },
 
    --------------------------------------------------------------------
    -- ok: arweave.post_farcaster_frame_tx.tx_id = ""
-   -- wip: arweave.post_farcaster_frame_tx.body = ""
+   -- ok: arweave.post_farcaster_frame_tx.body = ""
    --------------------------------------------------------------------
    post_farcaster_frame_tx = {
       scan = "fuzzer",
@@ -788,15 +881,18 @@ local api = {
          {
             arg_name = "tx_id",
             default = "",
-            fuzzer = {}
+            fuzzer = {
+               t = "number",
+               size = 32,
+               base = 64
+            }
          }
-      }
+      },
+      body = ""
    },
 
    --------------------------------------------------------------------
    -- ok: arweave.post_block2.body = ""
-   -- wip: arweave.post_block2.headers.arweave-block-hash = ""
-   -- wip: arweave.post_block2.headers.arweave-recall-byte = ""
    --------------------------------------------------------------------
    post_post_block2 = {
       scan = "full",
@@ -805,7 +901,8 @@ local api = {
       headers = {
          "arweave-block-hash",
          "arweave-recall-byte"
-      }
+      },
+      body = ""
    },
 
    --------------------------------------------------------------------
@@ -815,6 +912,7 @@ local api = {
       scan = "full",
       method = "post",
       path = { "block_announcement" },
+      body = ""
    },
 
    --------------------------------------------------------------------
@@ -827,7 +925,8 @@ local api = {
       headers = {
          "arweave-block-hash",
          "arweave-recall-byte"
-      }
+      },
+      body = ""
    },
 
    --------------------------------------------------------------------
@@ -840,7 +939,8 @@ local api = {
       headers = {
          "arweave-data-root",
          "arweave-data-size"
-      }
+      },
+      body = ""
    },
 
    --------------------------------------------------------------------
@@ -850,6 +950,7 @@ local api = {
       scan = "full",
       method = "post",
       path = { "coordinated_mining", "h1" },
+      body = ""
    },
 
    --------------------------------------------------------------------
@@ -859,6 +960,7 @@ local api = {
       scan = "full",
       method = "post",
       path = { "coordinated_mining", "h2" },
+      body = ""
    },
 
    --------------------------------------------------------------------
@@ -868,6 +970,7 @@ local api = {
       scan = "full",
       method = "post",
       path = { "height" },
+      body = ""
    },
 
    --------------------------------------------------------------------
@@ -879,8 +982,9 @@ local api = {
       path = { "partial_solution" },
       headers = {
          "x-internal-api-secret",
-         "x-cm-api-secret"         
-      }
+         "x-cm-api-secret"
+      },
+      body = ""
    },
 
    --------------------------------------------------------------------
@@ -890,6 +994,7 @@ local api = {
       scan = "full",
       method = "post",
       path = { "peers" },
+      body = ""
    },
 
    --------------------------------------------------------------------
@@ -902,7 +1007,8 @@ local api = {
       path = { "tx" },
       headers = {
          "arweave-tx-id"
-      }
+      },
+      body = ""
    },
 
    --------------------------------------------------------------------
@@ -915,7 +1021,8 @@ local api = {
       path = { "tx2" },
       headers = {
          "arweave-tx-id"
-      }
+      },
+      body = ""
    },
 
    --------------------------------------------------------------------
@@ -927,7 +1034,8 @@ local api = {
       path = { "unsigned_tx" },
       headers = {
          "arweave-tx-id"
-      }
+      },
+      body = ""
    },
 
    --------------------------------------------------------------------
@@ -937,7 +1045,8 @@ local api = {
    post_vdf = {
       scan = "full",
       method = "post",
-      path = { "vdf" }
+      path = { "vdf" },
+      body = ""
    },
 
    --------------------------------------------------------------------
@@ -947,11 +1056,13 @@ local api = {
    post_wallet = {
       scan = "full",
       method = "post",
-      path = { "wallet" }
+      path = { "wallet" },
+      body = ""
    },
 
    --------------------------------------------------------------------
-   --
+   -- ok: arweave.get_block_index_from_to.from = ""
+   -- ok: arweave.get_block_index_from_to.to = ""
    --------------------------------------------------------------------
    get_block_index_from_to = {
       scan = "fuzzer",
@@ -961,18 +1072,23 @@ local api = {
          {
             arg_name = "from",
             default = "",
-            fuzzer = {}
+            fuzzer = {
+               -- to be defined
+            }
          },
          {
             arg_name = "to",
             default = "",
-            fuzzer = {}
+            fuzzer = {
+               -- to be defined
+            }
          }
       }
    },
 
    --------------------------------------------------------------------
-   --
+   -- ok: arweave.get_block_index2_from_to.from = ""
+   -- ok: arweave.get_block_index2_from_to.to = ""
    --------------------------------------------------------------------
    get_block_index2_from_to = {
       scan = "fuzzer",
@@ -982,18 +1098,22 @@ local api = {
          {
             arg_name = "from",
             default = "",
-            fuzzer = {}
+            fuzzer = {
+               -- to be defined
+            }
          },
          {
             arg_name = "to",
             default = "",
-            fuzzer = {}
+            fuzzer = {
+               -- to be defined
+            }
          }
       }
    },
 
    --------------------------------------------------------------------
-   --
+   -- no params
    --------------------------------------------------------------------
    get_block_current = {
       scan = "full",
@@ -1002,7 +1122,8 @@ local api = {
    },
 
    --------------------------------------------------------------------
-   --
+   -- ok: arweave.get_data_sync_record_start_limit.start = ""
+   -- ok: arweave.get_data_sync_record_start_limit.limit = ""
    --------------------------------------------------------------------
    get_data_sync_record_start_limit = {
       scan = "fuzzer",
@@ -1012,18 +1133,22 @@ local api = {
          {
             arg_name = "start",
             default = "",
-            fuzzer = {}
+            fuzzer = {
+               -- to be defined
+            }
          },
          {
             arg_name = "limit",
             default = "",
-            fuzzer = {}
+            fuzzer = {
+               -- to be defined
+            }
          }
       }
    },
 
    --------------------------------------------------------------------
-   --
+   -- no params
    --------------------------------------------------------------------
    get_recent_hash_list = {
       scan = "default",
@@ -1032,7 +1157,7 @@ local api = {
    },
 
    --------------------------------------------------------------------
-   --
+   -- no params
    --------------------------------------------------------------------
    get_hash_list = {
       scan = "default",
@@ -1041,7 +1166,8 @@ local api = {
    },
 
    --------------------------------------------------------------------
-   --
+   -- ok: arweave.get_hash_list_from_to.from = ""
+   -- ok: arweave.get_hash_list_from_to.to = ""
    --------------------------------------------------------------------
    get_hash_list_from_to = {
       scan = "fuzzer",
@@ -1051,18 +1177,23 @@ local api = {
          {
             arg_name = "from",
             default = "",
-            fuzzer = {}
+            fuzzer = {
+               -- to be defined
+            }
          },
          {
             arg_name = "to",
             default = "",
-            fuzzer = {}
+            fuzzer = {
+               -- to be defined
+            }
          }
       }
    },
 
    --------------------------------------------------------------------
-   --
+   -- ok: arweave.get_hash_list2_from_to.from = ""
+   -- ok: arweave.get_hash_list2_from_to.to = ""
    --------------------------------------------------------------------
    get_hash_list2_from_to = {
       scan = "fuzzer",
@@ -1083,7 +1214,7 @@ local api = {
    },
 
    --------------------------------------------------------------------
-   --
+   -- ok: arweave.get_jobs_output.prev_output = ""
    --------------------------------------------------------------------
    get_jobs_output = {
       scan = "fuzzer",
@@ -1099,7 +1230,7 @@ local api = {
    },
 
    --------------------------------------------------------------------
-   --
+   -- ok: arweave.get_wallet_list_hash.hash = ""
    --------------------------------------------------------------------
    get_wallet_list_hash = {
       scan = "fuzzer",
@@ -1115,7 +1246,8 @@ local api = {
    },
 
    --------------------------------------------------------------------
-   --
+   -- ok: arweave.get_wallet_list_hash_cursor.hash = ""
+   -- ok: arweave.get_wallet_list_hash_cursor.cursor = ""
    --------------------------------------------------------------------
    get_wallet_list_hash_cursor = {
       scan = "fuzzer",
@@ -1136,7 +1268,8 @@ local api = {
    },
 
    --------------------------------------------------------------------
-   --
+   -- ok: arweave.get_wallet_list_hash_address_balance.hash = ""
+   -- ok: arweave.get_wallet_list_hash_address_balance.address = ""
    --------------------------------------------------------------------
    get_wallet_list_hash_address_balance = {
       scan = "fuzzer",
@@ -1158,7 +1291,7 @@ local api = {
    },
 
    --------------------------------------------------------------------
-   --
+   -- ok: arweave.get_wallet_address_balance.address = ""
    --------------------------------------------------------------------
    get_wallet_address_balance = {
       scan = "fuzzer",
@@ -1175,7 +1308,7 @@ local api = {
    },
 
    --------------------------------------------------------------------
-   --
+   -- ok: arweave.get_wallet_address_reserved_rewards_total.address = ""
    --------------------------------------------------------------------
    get_wallet_address_reserved_rewards_total = {
       scan = "fuzzer",
@@ -1192,7 +1325,7 @@ local api = {
    },
 
    --------------------------------------------------------------------
-   --
+   -- ok: arweave.get_wallet_address_last_tx.address = ""
    --------------------------------------------------------------------
    get_wallet_address_last_tx = {
       scan = "fuzzer",
@@ -1209,7 +1342,7 @@ local api = {
    },
 
    --------------------------------------------------------------------
-   --
+   -- ok: arweave.get_inflation_height.height = ""
    --------------------------------------------------------------------
    get_inflation_height = {
       scan = "fuzzer",
@@ -1225,7 +1358,7 @@ local api = {
    },
 
    --------------------------------------------------------------------
-   --
+   -- ok: arweave.get_optimistic_price_size.size = ""
    --------------------------------------------------------------------
    get_optimistic_price_size = {
       scan = "fuzzer",
@@ -1241,7 +1374,8 @@ local api = {
    },
 
    --------------------------------------------------------------------
-   --
+   -- ok: arweave.get_optimistic_price_size_address.size = ""
+   -- ok: arweave.get_optimistic_price_size_address.address = ""
    --------------------------------------------------------------------
    get_optimistic_price_size_address = {
       scan = "fuzzer",
@@ -1262,7 +1396,8 @@ local api = {
    },
 
    --------------------------------------------------------------------
-   --
+   -- ok: arweave.get_v2price_size_address.size = ""
+   -- ok: arweave.get_v2price_size_address.address = ""
    --------------------------------------------------------------------
    get_v2price_size_address = {
       scan = "fuzzer",
@@ -1283,7 +1418,7 @@ local api = {
    },
 
    --------------------------------------------------------------------
-   --
+   -- ok: arweave.get_reward_history_bh.bh = ""
    --------------------------------------------------------------------
    get_reward_history_bh = {
       scan = "fuzzer",
@@ -1299,7 +1434,7 @@ local api = {
    },
 
    --------------------------------------------------------------------
-   --
+   -- ok: arweave.get_block_time_history_bh.bh = ""
    --------------------------------------------------------------------
    get_block_time_history_bh = {
       scan = "fuzzer",
@@ -1315,7 +1450,8 @@ local api = {
    },
 
    --------------------------------------------------------------------
-   --
+   -- ok: arweave.get_block_type_id.type = ""
+   -- ok: arweave.get_block_type_id.id = ""
    --------------------------------------------------------------------
    get_block_type_id = {
       scan = "fuzzer",
@@ -1336,7 +1472,9 @@ local api = {
    },
 
    --------------------------------------------------------------------
-   --
+   -- ok: arweave.get_block_type_id_field.type = ""
+   -- ok: arweave.get_block_type_id_field.id = ""
+   -- ok: arweave.get_block_type_id_field.field = ""
    --------------------------------------------------------------------
    get_block_type_id_field = {
       scan = "fuzzer",
@@ -1362,7 +1500,8 @@ local api = {
    },
 
    --------------------------------------------------------------------
-   --
+   -- ok: arweave.get_block2_type_id.type = ""
+   -- ok: arweave.get_block2_type_id.id = ""
    --------------------------------------------------------------------
    get_block2_type_id = {
       scan = "fuzzer",
@@ -1383,7 +1522,8 @@ local api = {
    },
 
    --------------------------------------------------------------------
-   --
+   -- ok: arweave.get_block_height_wallet_address_balance.height = ""
+   -- ok: arweave.get_block_height_wallet_address_balance.address = ""
    --------------------------------------------------------------------
    get_block_height_wallet_address_balance = {
       scan = "fuzzer",
@@ -1407,7 +1547,8 @@ local api = {
    },
 
    --------------------------------------------------------------------
-   --
+   -- ok: arweave.get_tx_hash_field.hash = ""
+   -- ok: arweave.get_tx_hash_field.field = ""
    --------------------------------------------------------------------
    get_tx_hash_field = {
       scan = "fuzzer",
@@ -1431,7 +1572,9 @@ local api = {
    },
 
    --------------------------------------------------------------------
-   --
+   -- ok: arweave.get_balance_address_network_token.address = ""
+   -- ok: arweave.get_balance_address_network_token.network = ""
+   -- ok: arweave.get_balance_address_network_token.token = ""
    --------------------------------------------------------------------
    get_balance_address_network_token = {
       scan = "fuzzer",
@@ -1457,7 +1600,7 @@ local api = {
    },
 
    --------------------------------------------------------------------
-   --
+   -- ok: arweave.get_is_tx_blacklisted.tx_id = ""
    --------------------------------------------------------------------
    get_is_tx_blacklisted = {
       scan = "fuzzer",
@@ -1473,7 +1616,7 @@ local api = {
    },
 
    --------------------------------------------------------------------
-   --
+   -- ok: arweave.get_price2_size.size = ""
    --------------------------------------------------------------------
    get_price2_size = {
       scan = "fuzzer",
@@ -1489,7 +1632,8 @@ local api = {
    },
 
    --------------------------------------------------------------------
-   --
+   -- ok: arweave.get_price_size_addr.size = ""
+   -- ok: arweave.get_price_size_addr.address = ""
    --------------------------------------------------------------------
    get_price_size_addr = {
       scan = "fuzzer",
@@ -1510,7 +1654,8 @@ local api = {
    },
 
    --------------------------------------------------------------------
-   --
+   -- ok: arweave.get_price2_size_addr.size = ""
+   -- ok: arweave.get_price2_size_addr.address = ""
    --------------------------------------------------------------------
    get_price2_size_addr = {
       scan = "fuzzer",
@@ -1531,7 +1676,7 @@ local api = {
    },
 
    --------------------------------------------------------------------
-   --
+   -- no params
    --------------------------------------------------------------------
    get_tx_ready_for_mining = {
       comment = "only available for testnet miners",
@@ -1540,7 +1685,7 @@ local api = {
    },
 
    --------------------------------------------------------------------
-   --
+   -- ok: arweave.get_unconfirmed_tx.hash = ""
    --------------------------------------------------------------------
    get_unconfirmed_tx = {
       scan = "fuzzer",
@@ -1556,7 +1701,7 @@ local api = {
    },
 
    --------------------------------------------------------------------
-   --
+   -- ok: arweave.get_unconfirmed_tx.hash = ""
    --------------------------------------------------------------------
    get_unconfirmed_tx = {
       scan = "fuzzer",
@@ -1572,22 +1717,24 @@ local api = {
    },
 
    --------------------------------------------------------------------
-   --
+   -- ok: arweave.post_pool_cm_jobs = ""
    --------------------------------------------------------------------
    post_pool_cm_jobs = {
       scan = "default",
       method = "post",
-      path = { "pool_cm_jobs" }
+      path = { "pool_cm_jobs" },
+      body = ""
    },
 
    --------------------------------------------------------------------
-   --
+   -- ok: arweave.post_mine.body = ""
    --------------------------------------------------------------------
    post_mine = {
       scan = "default",
       comment = "only activated for testnet miners",
       method = "post",
-      path = { "mine" }
+      path = { "mine" },
+      body = ""
    },
 
 
@@ -1614,20 +1761,55 @@ local api = {
 }
 
 ----------------------------------------------------------------------
--- full scan generated with the key present in api data structure
+-- wip: fuzzer function to generate random values and inject them.  it
+-- needs to support random number generate, and the output shoud be in
+-- hex, base10 or base64.
+--
+-- @usage fuzzer_number({ t = "number", size = 32, ...})
+-- @return random_value
 ----------------------------------------------------------------------
-local full_scan = function()
-   local buffer = {}
-   for key, value in pairs(api) do
-      table.insert(buffer, key)
+local fuzzer = function(params)
+   if params["t"] == "number" then
+      return fuzzer_number(params)
    end
-   return buffer
+   error("unsupported fuzzer")
+end
+
+----------------------------------------------------------------------
+-- wip: this script needs to return different kind of number, in
+-- different format and in different bases.
+----------------------------------------------------------------------
+local fuzzer_number = function(params)
+   -- the size of random data in bytes
+   local size = params["size"] or 32
+
+   -- the minimal value allowed
+   local min = params["min"] or 0
+
+   -- the maximal value allowed
+   local max = params["max"] or 34359738368
+
+   -- the output format, as string, integer, binary...
+   local format = params["format"] or "integer"
+
+   -- the base of the number generated
+   local base = params["base"] or 10
+
+   -- a rule is a pipeline of functions altering the return of each
+   -- values.
+   -- local rules = params["rules"] or {}
+
+   -- openssl...
+
+   return nil
 end
 
 ----------------------------------------------------------------------
 -- convert a table made of string and table into a path
+-- @param path_id the key from api table
+-- @return string a formatted end-point
 ----------------------------------------------------------------------
-http_path = function(path_id)
+local http_path = function(path_id)
    local template_path = api[path_id]["path"]
    local path = {}
 
@@ -1667,16 +1849,24 @@ end
 ----------------------------------------------------------------------
 -- create arweave argument path
 -- create_arg_path("id", "name") => arweave.id.name
+-- @param path_id a key from api table
+-- @param name a string
+-- @return string
 ----------------------------------------------------------------------
-create_arg_path = function(path_id, name)
+local create_arg_path = function(path_id, name)
    local arg_key = {"arweave", path_id, name}
    return table.concat(arg_key, ".")
 end
 
 ----------------------------------------------------------------------
 -- wrapper around http request for get
+-- @param host nmap host structure
+-- @param port nmap port structure
+-- @param path_id a key from api table
+-- @param options http options
+-- @return stdnse.output_table()
 ----------------------------------------------------------------------
-http_request = function(host, port, path_id, options)
+local http_request = function(host, port, path_id, options)
    local output = stdnse.output_table()
    local method = api[path_id]["method"]
    local path = http_path(path_id)
@@ -1801,8 +1991,11 @@ end
 -- returns true if it's a gateway or a miner, else false. To do that,
 -- this function analyze the JSON object returned by / using get
 -- method.
+-- @param host nmap host structure
+-- @param port nmap port structure
+-- @return output or nil
 ----------------------------------------------------------------------
-is_gateway = function(host, port)
+local is_gateway = function(host, port)
    local output = http_request(host, port, "root")
 
    if output.http_status ~= 200 then
@@ -1824,7 +2017,15 @@ is_gateway = function(host, port)
 end
 
 ----------------------------------------------------------------------
+-- postrule
+----------------------------------------------------------------------
+portrule = shortport.port_or_service(1984, "arweave", "tcp", "open")
+
+----------------------------------------------------------------------
 -- entry point
+-- @param host nmap host structure
+-- @param port nmap port structure
+-- @return output or nil
 ----------------------------------------------------------------------
 action = function(host, port)
    local gateway = is_gateway(host, port)
@@ -1873,8 +2074,8 @@ action = function(host, port)
             output[key] = result
          end
       end
-      return output
 
+      return output
    end
 
    return nil
