@@ -33,9 +33,9 @@
 -- @see https://docs.ar.io/gateways/ar-io-node/admin/admin-api.html#overview
 -- @usage nmap --script=arweave.nse [--script-args=<Args>] <targets>
 -- @usage nmap --script=+arweave.nse -p <port> [--script-args=<Args>] <targets>
--- @args arweave.scan (optional)
--- @args arweave.scan_only (optional)
--- @args arweave.scan_filter (optional)
+-- @args arweave.mode (optional): identify (default), fingerprint, fuzzing, inject
+-- @args arweave.scan_only (optional): string
+-- @args arweave.scan_filter (optional): match pattern string
 -- @args arweave.headers (optional)
 -- @args arweave.get_balance_address_network_token.address (optional)
 -- @args arweave.get_balance_address_network_token.network (optional)
@@ -237,7 +237,7 @@ local api = {
    --------------------------------------------------------------------
    get_root = {
       comment = "default path (/) used to evaluate the server.",
-      scan = "init",
+      mode = { "identify", "fingerprint", "fuzzing", "inject" },
       method = "get",
       path = {}
    },
@@ -246,7 +246,8 @@ local api = {
    -- no params
    --------------------------------------------------------------------
    get_info = {
-      scan = "default",
+      comment = "collect node information from /info",
+      mode = { "identify", "fingerprint", "fuzzing", "inject" },
       method = "get",
       path = { "info" }
    },
@@ -255,8 +256,8 @@ local api = {
    -- no params. used to identify if the target is an arweave node.
    --------------------------------------------------------------------
    head_root = {
-      comment = "",
-      scan = "init",
+      comment = "head method used to check if the service is up",
+      mode = { "identify", "fingerprint", "fuzzing", "inject" },
       method = "head",
       path = {}
    },
@@ -265,7 +266,8 @@ local api = {
    -- no params. used to identify if the target is an arweave node.
    --------------------------------------------------------------------
    head_info = {
-      scan = "init",
+      comment = "head method used to check if the service is up",
+      mode = { "identify", "fingerprint", "fuzzing", "inject" },
       method = "head",
       path = { "info" }
    },
@@ -275,7 +277,7 @@ local api = {
    --------------------------------------------------------------------
    get_admin_debug = {
       comment = "admin debug interface. It should be close by default.",
-      scan = "default",
+      mode = { "fingerprint", "fuzzing", "inject" },
       method = "get",
       path = { "ar-io", "admin", "debug" }
    },
@@ -284,7 +286,8 @@ local api = {
    -- no params
    --------------------------------------------------------------------
    get_block_index = {
-      scan = "default",
+      comment = "get a block, it should return a json object",
+      mode = { "fingerprint", "fuzzing", "inject" },
       method = "get",
       path = { "block_index" }
    },
@@ -293,7 +296,8 @@ local api = {
    -- no params
    --------------------------------------------------------------------
    get_block_index2 = {
-      scan = "default",
+      comment = "get a block, it should return etf data",
+      mode = { "fingerprint", "fuzzing", "inject" },
       method = "get",
       path = { "block_index2" }
    },
@@ -302,7 +306,8 @@ local api = {
    -- no params
    --------------------------------------------------------------------
    get_chunk = {
-      scan = "default",
+      comment = "get a chunk, it should return a json object",
+      mode = { "fingerprint", "fuzzing", "inject" },
       method = "get",
       path = { "chunk" },
       headers = {
@@ -315,7 +320,8 @@ local api = {
    -- no params
    --------------------------------------------------------------------
    get_chunk2 = {
-      scan = "default",
+      comment = "get a chunk, it should return etf data",
+      mode = { "fingerprint", "fuzzing", "inject" },
       method = "get",
       path = { "chunk2" },
       headers = {
@@ -328,7 +334,8 @@ local api = {
    -- no params
    --------------------------------------------------------------------
    get_chunk_proof = {
-      scan = "default",
+      comment = "",
+      mode = { "fingerprint", "fuzzing", "inject" },
       method = "get",
       path = { "chunk_proof" },
       headers = {
@@ -341,7 +348,8 @@ local api = {
    -- no params
    --------------------------------------------------------------------
    get_chunk_offset = {
-      scan = "fuzzer",
+      comment = "",
+      mode = { "fuzzing", "inject" },
       method = "get",
       path = {
          "chunk",
@@ -363,7 +371,8 @@ local api = {
    -- no params
    --------------------------------------------------------------------
    get_chunk_proof_offset = {
-      scan = "fuzzer",
+      comment = "",
+      mode = { "fuzzing", "inject" },
       method = "get",
       path = {
          "chunk_proof",
@@ -385,7 +394,8 @@ local api = {
    -- no params
    --------------------------------------------------------------------
    get_chunk_proof_offset = {
-      scan = "fuzzer",
+      comment = "",
+      mode = { "fuzzing", "inject" },
       method = "get",
       path = {
          "chunk2",
@@ -407,8 +417,8 @@ local api = {
    -- no params
    --------------------------------------------------------------------
    get_chunk_proof2_offset = {
-      scan = "fuzzer",
-      method = "get",
+      comment = "",
+      mode = { "fuzzing", "inject" },
       path = {
          "chunk_proof2",
          {
@@ -429,7 +439,8 @@ local api = {
    -- no params
    --------------------------------------------------------------------
    get_coordinated_mining_partition_table = {
-      scan = "full",
+      comment = "",
+      mode = { "fingerprint", "fuzzing", "inject" },
       method = "get",
       path = { "coordinated_mining", "partition_table" }
    },
@@ -438,7 +449,8 @@ local api = {
    -- no params
    --------------------------------------------------------------------
    get_coordinated_mining_state = {
-      scan = "full",
+      comment = "",
+      mode = { "fingerprint", "fuzzing", "inject" },
       method = "get",
       path = { "coordinated_mining", "state" }
    },
@@ -447,7 +459,8 @@ local api = {
    -- no params
    --------------------------------------------------------------------
    get_current_block = {
-      scan = "full",
+      comment = "",
+      mode = { "fingerprint", "fuzzing", "inject" },
       comment = "deprecated",
       method = "get",
       path = { "current_block" }
@@ -457,7 +470,8 @@ local api = {
    -- no params
    --------------------------------------------------------------------
    get_data_sync_record = {
-      scan = "default",
+      comment = "",
+      mode = { "fingerprint", "fuzzing", "inject" },
       method = "get",
       path = { "data_sync_record" },
       headers = {
@@ -469,7 +483,8 @@ local api = {
    -- no params
    --------------------------------------------------------------------
    get_height = {
-      scan = "default",
+      comment = "",
+      mode = { "identify", "fingerprint", "fuzzing", "inject" },
       method = "get",
       path = { "height" }
    },
@@ -478,7 +493,8 @@ local api = {
    -- no params
    --------------------------------------------------------------------
    get_jobs = {
-      scan = "default",
+      comment = "",
+      mode = { "identify", "fingerprint", "fuzzing", "inject" },
       method = "get",
       path = { "jobs" }
    },
@@ -487,7 +503,8 @@ local api = {
    -- no params
    --------------------------------------------------------------------
    get_peers = {
-      scan = "default",
+      comment = "",
+      mode = { "identify", "fingerprint", "fuzzing", "inject" },
       method = "get",
       path = { "peers" }
    },
@@ -496,7 +513,7 @@ local api = {
    -- no params
    --------------------------------------------------------------------
    get_queue = {
-      scan = "default",
+      mode = { "identify", "fingerprint", "fuzzing", "inject" },
       comment = "deprecated end-point",
       method = "get",
       path = { "queue" }
@@ -506,7 +523,7 @@ local api = {
    -- no params
    --------------------------------------------------------------------
    get_rates = {
-      scan = "default",
+      mode = { "identify", "fingerprint", "fuzzing", "inject" },
       method = "get",
       path = { "rates" }
    },
@@ -515,7 +532,7 @@ local api = {
    -- no params
    --------------------------------------------------------------------
    get_recent_hash_list_diff = {
-      scan = "default",
+      mode = { "fingerprint", "fuzzing", "inject" },
       method = "get",
       path = { "recent_hash_list_diff" }
    },
@@ -524,7 +541,7 @@ local api = {
    -- no params
    --------------------------------------------------------------------
    get_sync_buckets = {
-      scan = "default",
+      mode = { "fingerprint", "fuzzing", "inject" },
       method = "get",
       path = { "sync_buckets" }
    },
@@ -533,7 +550,7 @@ local api = {
    -- no params
    --------------------------------------------------------------------
    get_time = {
-      scan = "default",
+      mode = { "identify", "fingerprint", "fuzzing", "inject" },
       method = "get",
       path = { "time" }
    },
@@ -542,7 +559,7 @@ local api = {
    -- no params
    --------------------------------------------------------------------
    get_total_supply = {
-      scan = "default",
+      mode = { "identify", "fingerprint", "fuzzing", "inject" },
       method = "get",
       path = { "total_supply" }
    },
@@ -551,7 +568,8 @@ local api = {
    -- no params
    --------------------------------------------------------------------
    get_tx_anchor = {
-      scan = "default",
+      mode = "default",
+      mode = { "fingerprint", "fuzzing", "inject" },
       method = "get",
       path = { "tx_anchor" }
    },
@@ -560,7 +578,7 @@ local api = {
    -- no params
    --------------------------------------------------------------------
    get_tx_pending = {
-      scan = "default",
+      mode = { "fingerprint", "fuzzing", "inject" },
       method = "get",
       path = { "tx", "pending" }
    },
@@ -569,7 +587,7 @@ local api = {
    -- no params
    --------------------------------------------------------------------
    get_vdf = {
-      scan = "default",
+      mode = "default",
       method = "get",
       path = { "vdf" }
    },
@@ -578,7 +596,7 @@ local api = {
    -- no params
    --------------------------------------------------------------------
    get_vdf2 = {
-      scan = "default",
+      mode = { "fingerprint", "fuzzing", "inject" },
       method = "get",
       path = { "vdf2" }
    },
@@ -587,7 +605,7 @@ local api = {
    -- no params
    --------------------------------------------------------------------
    get_vdf2_previous_session = {
-      scan = "default",
+      mode = { "fingerprint", "fuzzing", "inject" },
       method = "get",
       path = { "vdf2", "previous_session" }
    },
@@ -596,7 +614,7 @@ local api = {
    -- no params
    --------------------------------------------------------------------
    get_vdf2_session = {
-      scan = "default",
+      mode = { "fingerprint", "fuzzing", "inject" },
       method = "get",
       path = { "vdf2", "session" }
    },
@@ -605,7 +623,7 @@ local api = {
    -- no params
    --------------------------------------------------------------------
    get_vdf_previous_session = {
-      scan = "default",
+      mode = { "fingerprint", "fuzzing", "inject" },
       method = "get",
       path = { "vdf", "previous_session" }
    },
@@ -614,7 +632,7 @@ local api = {
    -- no params
    --------------------------------------------------------------------
    get_vdf_session = {
-      scan = "default",
+      mode = { "fingerprint", "fuzzing", "inject" },
       method = "get",
       path = { "vdf", "session" }
    },
@@ -623,7 +641,7 @@ local api = {
    -- no params
    --------------------------------------------------------------------
    get_wallet = {
-      scan = "default",
+      mode = { "fingerprint", "fuzzing", "inject" },
       method = "get",
       path = { "wallet_list" }
    },
@@ -632,7 +650,7 @@ local api = {
    -- ok: arweave.get_price_size.size = 123
    --------------------------------------------------------------------
    get_price_size = {
-      scan = "fuzzer",
+      mode = { "fuzzing", "inject" },
       method = "get",
       path = {
          "price",
@@ -650,7 +668,7 @@ local api = {
    -- ok: arweave.get_price_size_target.size = 123
    --------------------------------------------------------------------
    get_price_size_target = {
-      scan = "fuzzer",
+      mode = { "fuzzing", "inject" },
       method = "get",
       path = {
          "price",
@@ -667,7 +685,7 @@ local api = {
    -- ok: arweave.get_wallet_balance.address = "address"
    --------------------------------------------------------------------
    get_wallet_balance = {
-      scan = "fuzzer",
+      mode = { "fuzzing", "inject" },
       method = "get",
       path = {
          "wallet",
@@ -688,7 +706,7 @@ local api = {
    -- ok: arweave.get_wallet_last_tx.address = "address"
    --------------------------------------------------------------------
    get_wallet_last_tx = {
-      scan = "fuzzer",
+      mode = { "fuzzing", "inject" },
       method = "get",
       path = {
          "wallet",
@@ -709,7 +727,7 @@ local api = {
    -- ok: arweave.get_block_height.height = 123
    --------------------------------------------------------------------
    get_block_height = {
-      scan = "fuzzer",
+      mode = { "fuzzing", "inject" },
       method = "get",
       path = {
          "block",
@@ -730,7 +748,7 @@ local api = {
    -- ok: arweave.get_block_hash.hash = "hash"
    --------------------------------------------------------------------
    get_block_hash = {
-      scan = "fuzzer",
+      mode = { "fuzzing", "inject" },
       method = "get",
       path = {
          "block",
@@ -751,7 +769,7 @@ local api = {
    -- ok: arweave.get_tx.tx_id = "tx_id"
    --------------------------------------------------------------------
    get_tx = {
-      scan = "fuzzer",
+      mode = { "fuzzing", "inject" },
       method = "get",
       path = {
          "tx",
@@ -771,7 +789,7 @@ local api = {
    -- ok: arweave.get_tx_offset.tx_id = "tx_id"
    --------------------------------------------------------------------
    get_tx_offset = {
-      scan = "fuzzer",
+      mode = { "fuzzing", "inject" },
       method = "get",
       path = {
          "tx",
@@ -792,7 +810,7 @@ local api = {
    -- ok: arweave.get_tx_state.tx_id = "tx_id"
    --------------------------------------------------------------------
    get_tx_status = {
-      scan = "fuzzer",
+      mode = { "fuzzing", "inject" },
       method = "get",
       path = {
          "tx",
@@ -813,7 +831,7 @@ local api = {
    -- ok: arweave.get_chunks.offset = "offset"
    --------------------------------------------------------------------
    get_chunks = {
-      scan = "fuzzer",
+      mode = { "fuzzing", "inject" },
       method = "get",
       path = {
          "chunk",
@@ -831,7 +849,7 @@ local api = {
    -- ok: arweave.post_admin_queue_tx.body = ""
    --------------------------------------------------------------------
    post_admin_queue_tx = {
-      scan = "full",
+      mode = { "fuzzing", "inject" },
       method = "post",
       path = { "ar-io", "admin", "queue-tx" },
       body = ""
@@ -841,7 +859,7 @@ local api = {
    -- ok: arweave.put_admin_block_data.body = ""
    --------------------------------------------------------------------
    put_admin_block_data = {
-      scan = "full",
+      mode = { "fuzzing", "inject" },
       method = "put",
       path = { "ar-io", "admin", "block-data" },
       body = ""
@@ -851,7 +869,7 @@ local api = {
    -- ok: arweave.get_farcaster_frame_tx.tx_id = ""
    --------------------------------------------------------------------
    get_farcaster_frame_tx = {
-      scan = "fuzzer",
+      mode = { "fuzzing", "inject" },
       method = "get",
       path = {
          "local",
@@ -874,7 +892,7 @@ local api = {
    -- ok: arweave.post_farcaster_frame_tx.body = ""
    --------------------------------------------------------------------
    post_farcaster_frame_tx = {
-      scan = "fuzzer",
+      mode = { "fuzzing", "inject" },
       method = "post",
       path = {
          "local",
@@ -897,7 +915,7 @@ local api = {
    -- ok: arweave.post_block2.body = ""
    --------------------------------------------------------------------
    post_post_block2 = {
-      scan = "full",
+      mode = { "fuzzing", "inject" },
       method = "post",
       path = { "block2" },
       headers = {
@@ -911,7 +929,7 @@ local api = {
    -- ok: arweave.post_block_announcement.body = ""
    --------------------------------------------------------------------
    post_block_announcement = {
-      scan = "full",
+      mode = { "fuzzing", "inject" },
       method = "post",
       path = { "block_announcement" },
       body = ""
@@ -921,7 +939,7 @@ local api = {
    -- ok: arweave.post_block.body = ""
    --------------------------------------------------------------------
    post_block = {
-      scan = "full",
+      mode = { "fuzzing", "inject" },
       method = "post",
       path = { "block" },
       headers = {
@@ -935,7 +953,7 @@ local api = {
    -- ok: arweave.post_block.body = ""
    --------------------------------------------------------------------
    post_chunk = {
-      scan = "full",
+      mode = { "fuzzing", "inject" },
       method = "post",
       path = { "chunk" },
       headers = {
@@ -949,7 +967,7 @@ local api = {
    -- ok: arweave.post_coordinated_mining_h1.body = ""
    --------------------------------------------------------------------
    post_coordinated_mining_h1 = {
-      scan = "full",
+      mode = { "fuzzing", "inject" },
       method = "post",
       path = { "coordinated_mining", "h1" },
       body = ""
@@ -959,7 +977,8 @@ local api = {
    -- ok: arweave.post_coordinated_mining_h2.body = ""
    --------------------------------------------------------------------
    post_coordinated_mining_h2 = {
-      scan = "full",
+      mode = "full",
+      mode = { "fuzzing", "inject" },
       method = "post",
       path = { "coordinated_mining", "h2" },
       body = ""
@@ -969,7 +988,7 @@ local api = {
    -- ok: arweave.post_height.body = ""
    --------------------------------------------------------------------
    post_height = {
-      scan = "full",
+      mode = { "fuzzing", "inject" },
       method = "post",
       path = { "height" },
       body = ""
@@ -979,7 +998,7 @@ local api = {
    -- ok: arweave.post_partial_solution.body = ""
    --------------------------------------------------------------------
    post_partial_solution = {
-      scan = "full",
+      mode = { "fuzzing", "inject" },
       method = "post",
       path = { "partial_solution" },
       headers = {
@@ -993,7 +1012,7 @@ local api = {
    -- ok: arweave.post_peers.body = ""
    --------------------------------------------------------------------
    post_peers = {
-      scan = "full",
+      mode = { "fuzzing", "inject" },
       method = "post",
       path = { "peers" },
       body = ""
@@ -1003,7 +1022,7 @@ local api = {
    -- ok: arweave.post_tx.body = ""
    --------------------------------------------------------------------
    post_tx = {
-      scan = "full",
+      mode = { "fuzzing", "inject" },
       comment = "return json encoded transaction",
       method = "post",
       path = { "tx" },
@@ -1017,7 +1036,7 @@ local api = {
    -- ok: arweave.post_tx2.body = ""
    --------------------------------------------------------------------
    post_tx2 = {
-      scan = "full",
+      mode = { "fuzzing", "inject" },
       comment = "return binary encoded transaction",
       method = "post",
       path = { "tx2" },
@@ -1031,7 +1050,7 @@ local api = {
    -- ok: arweave.post_unsigned_tx.body = ""
    --------------------------------------------------------------------
    post_unsigned_tx = {
-      scan = "full",
+      mode = { "fuzzing", "inject" },
       method = "post",
       path = { "unsigned_tx" },
       headers = {
@@ -1045,7 +1064,7 @@ local api = {
    -- wip: arweave.post_vdf.fuzzing = true | false
    --------------------------------------------------------------------
    post_vdf = {
-      scan = "full",
+      mode = { "fuzzing", "inject" },
       method = "post",
       path = { "vdf" },
       body = ""
@@ -1056,7 +1075,7 @@ local api = {
    -- wip: arweave.post_wallet.fuzzing = true | false
    --------------------------------------------------------------------
    post_wallet = {
-      scan = "full",
+      mode = { "fuzzing", "inject" },
       method = "post",
       path = { "wallet" },
       body = ""
@@ -1067,7 +1086,7 @@ local api = {
    -- ok: arweave.get_block_index_from_to.to = ""
    --------------------------------------------------------------------
    get_block_index_from_to = {
-      scan = "fuzzer",
+      mode = { "fuzzing", "inject" },
       method = "get",
       path = {
          "block_index",
@@ -1093,7 +1112,7 @@ local api = {
    -- ok: arweave.get_block_index2_from_to.to = ""
    --------------------------------------------------------------------
    get_block_index2_from_to = {
-      scan = "fuzzer",
+      mode = { "fuzzing", "inject" },
       method = "get",
       path = {
          "block_index2",
@@ -1118,7 +1137,7 @@ local api = {
    -- no params
    --------------------------------------------------------------------
    get_block_current = {
-      scan = "full",
+      mode = { "fingerprint", "fuzzing", "inject" },
       method = "get",
       path = { "block", "current" }
    },
@@ -1128,7 +1147,7 @@ local api = {
    -- ok: arweave.get_data_sync_record_start_limit.limit = ""
    --------------------------------------------------------------------
    get_data_sync_record_start_limit = {
-      scan = "fuzzer",
+      mode = { "fuzzing", "inject" },
       method = "get",
       path = {
          "data_sync_record",
@@ -1153,7 +1172,7 @@ local api = {
    -- no params
    --------------------------------------------------------------------
    get_recent_hash_list = {
-      scan = "default",
+      mode = { "fingerprint", "fuzzing", "inject" },
       method = "get",
       path = { "recent_hash_list" }
    },
@@ -1162,7 +1181,7 @@ local api = {
    -- no params
    --------------------------------------------------------------------
    get_hash_list = {
-      scan = "default",
+      mode = { "fingerprint", "fuzzing", "inject" },
       method = "get",
       path = { "hash_list" }
    },
@@ -1172,7 +1191,7 @@ local api = {
    -- ok: arweave.get_hash_list_from_to.to = ""
    --------------------------------------------------------------------
    get_hash_list_from_to = {
-      scan = "fuzzer",
+      mode = { "fuzzing", "inject" },
       method = "get",
       path = {
          "hash_list",
@@ -1198,7 +1217,7 @@ local api = {
    -- ok: arweave.get_hash_list2_from_to.to = ""
    --------------------------------------------------------------------
    get_hash_list2_from_to = {
-      scan = "fuzzer",
+      mode = { "fuzzing", "inject" },
       method = "get",
       path = {
          "hash_list2",
@@ -1219,7 +1238,7 @@ local api = {
    -- ok: arweave.get_jobs_output.prev_output = ""
    --------------------------------------------------------------------
    get_jobs_output = {
-      scan = "fuzzer",
+      mode = { "fuzzing", "inject" },
       method = "get",
       path = {
          "jobs",
@@ -1235,7 +1254,7 @@ local api = {
    -- ok: arweave.get_wallet_list_hash.hash = ""
    --------------------------------------------------------------------
    get_wallet_list_hash = {
-      scan = "fuzzer",
+      mode = { "fuzzing", "inject" },
       method = "get",
       path = {
          "wallet_list",
@@ -1252,7 +1271,7 @@ local api = {
    -- ok: arweave.get_wallet_list_hash_cursor.cursor = ""
    --------------------------------------------------------------------
    get_wallet_list_hash_cursor = {
-      scan = "fuzzer",
+      mode = { "fuzzing", "inject" },
       method = "get",
       path = {
          "wallet_list",
@@ -1274,7 +1293,7 @@ local api = {
    -- ok: arweave.get_wallet_list_hash_address_balance.address = ""
    --------------------------------------------------------------------
    get_wallet_list_hash_address_balance = {
-      scan = "fuzzer",
+      mode = { "fuzzing", "inject" },
       method = "get",
       path = {
          "wallet_list",
@@ -1296,7 +1315,7 @@ local api = {
    -- ok: arweave.get_wallet_address_balance.address = ""
    --------------------------------------------------------------------
    get_wallet_address_balance = {
-      scan = "fuzzer",
+      mode = { "fuzzing", "inject" },
       method = "get",
       path = {
          "wallet",
@@ -1313,7 +1332,7 @@ local api = {
    -- ok: arweave.get_wallet_address_reserved_rewards_total.address = ""
    --------------------------------------------------------------------
    get_wallet_address_reserved_rewards_total = {
-      scan = "fuzzer",
+      mode = { "fuzzing", "inject" },
       method = "get",
       path = {
          "wallet",
@@ -1330,7 +1349,7 @@ local api = {
    -- ok: arweave.get_wallet_address_last_tx.address = ""
    --------------------------------------------------------------------
    get_wallet_address_last_tx = {
-      scan = "fuzzer",
+      mode = { "fuzzing", "inject" },
       method = "get",
       path = {
          "wallet",
@@ -1347,7 +1366,7 @@ local api = {
    -- ok: arweave.get_inflation_height.height = ""
    --------------------------------------------------------------------
    get_inflation_height = {
-      scan = "fuzzer",
+      mode = { "fuzzing", "inject" },
       method = "get",
       path = {
          "inflation",
@@ -1363,7 +1382,7 @@ local api = {
    -- ok: arweave.get_optimistic_price_size.size = ""
    --------------------------------------------------------------------
    get_optimistic_price_size = {
-      scan = "fuzzer",
+      mode = { "fuzzing", "inject" },
       method = "get",
       path = {
          "optimistic_price",
@@ -1380,7 +1399,7 @@ local api = {
    -- ok: arweave.get_optimistic_price_size_address.address = ""
    --------------------------------------------------------------------
    get_optimistic_price_size_address = {
-      scan = "fuzzer",
+      mode = { "fuzzing", "inject" },
       method = "get",
       path = {
          "optimistic_price",
@@ -1402,7 +1421,7 @@ local api = {
    -- ok: arweave.get_v2price_size_address.address = ""
    --------------------------------------------------------------------
    get_v2price_size_address = {
-      scan = "fuzzer",
+      mode = { "fuzzing", "inject" },
       method = "get",
       path = {
          "v2price",
@@ -1423,7 +1442,7 @@ local api = {
    -- ok: arweave.get_reward_history_bh.bh = ""
    --------------------------------------------------------------------
    get_reward_history_bh = {
-      scan = "fuzzer",
+      mode = { "fuzzing", "inject" },
       method = "get",
       path = {
          "reward_history",
@@ -1439,7 +1458,7 @@ local api = {
    -- ok: arweave.get_block_time_history_bh.bh = ""
    --------------------------------------------------------------------
    get_block_time_history_bh = {
-      scan = "fuzzer",
+      mode = { "fuzzing", "inject" },
       method = "get",
       path = {
          "block_time_history",
@@ -1456,7 +1475,7 @@ local api = {
    -- ok: arweave.get_block_type_id.id = ""
    --------------------------------------------------------------------
    get_block_type_id = {
-      scan = "fuzzer",
+      mode = { "fuzzing", "inject" },
       method = "get",
       path = {
          "block",
@@ -1479,7 +1498,7 @@ local api = {
    -- ok: arweave.get_block_type_id_field.field = ""
    --------------------------------------------------------------------
    get_block_type_id_field = {
-      scan = "fuzzer",
+      mode = { "fuzzing", "inject" },
       method = "get",
       path = {
          "block",
@@ -1506,7 +1525,7 @@ local api = {
    -- ok: arweave.get_block2_type_id.id = ""
    --------------------------------------------------------------------
    get_block2_type_id = {
-      scan = "fuzzer",
+      mode = { "fuzzing", "inject" },
       method = "get",
       path = {
          "block2",
@@ -1528,7 +1547,7 @@ local api = {
    -- ok: arweave.get_block_height_wallet_address_balance.address = ""
    --------------------------------------------------------------------
    get_block_height_wallet_address_balance = {
-      scan = "fuzzer",
+      mode = { "fuzzing", "inject" },
       method = "get",
       path = {
          "block",
@@ -1553,7 +1572,7 @@ local api = {
    -- ok: arweave.get_tx_hash_field.field = ""
    --------------------------------------------------------------------
    get_tx_hash_field = {
-      scan = "fuzzer",
+      mode = { "fuzzing", "inject" },
       method = "get",
       path = {
          "tx",
@@ -1579,7 +1598,7 @@ local api = {
    -- ok: arweave.get_balance_address_network_token.token = ""
    --------------------------------------------------------------------
    get_balance_address_network_token = {
-      scan = "fuzzer",
+      mode = { "fuzzing", "inject" },
       method = "get",
       path = {
          "balance",
@@ -1605,7 +1624,7 @@ local api = {
    -- ok: arweave.get_is_tx_blacklisted.tx_id = ""
    --------------------------------------------------------------------
    get_is_tx_blacklisted = {
-      scan = "fuzzer",
+      mode = { "fuzzing", "inject" },
       method = "get",
       path = {
          "is_tx_blacklisted",
@@ -1621,7 +1640,7 @@ local api = {
    -- ok: arweave.get_price2_size.size = ""
    --------------------------------------------------------------------
    get_price2_size = {
-      scan = "fuzzer",
+      mode = { "fuzzing", "inject" },
       method = "get",
       path = {
          "price",
@@ -1638,7 +1657,7 @@ local api = {
    -- ok: arweave.get_price_size_addr.address = ""
    --------------------------------------------------------------------
    get_price_size_addr = {
-      scan = "fuzzer",
+      mode = { "fuzzing", "inject" },
       method = "get",
       path = {
          "price",
@@ -1660,7 +1679,7 @@ local api = {
    -- ok: arweave.get_price2_size_addr.address = ""
    --------------------------------------------------------------------
    get_price2_size_addr = {
-      scan = "fuzzer",
+      mode = { "fuzzing", "inject" },
       method = "get",
       path = {
          "price2",
@@ -1682,6 +1701,7 @@ local api = {
    --------------------------------------------------------------------
    get_tx_ready_for_mining = {
       comment = "only available for testnet miners",
+      mode = { "fingerprint", "fuzzing", "inject" },
       method = "get",
       path = { "tx", "ready_for_mining" }
    },
@@ -1690,7 +1710,7 @@ local api = {
    -- ok: arweave.get_unconfirmed_tx.hash = ""
    --------------------------------------------------------------------
    get_unconfirmed_tx = {
-      scan = "fuzzer",
+      mode = { "fuzzing", "inject" },
       method = "get",
       path = {
          "unconfirmed_tx",
@@ -1706,7 +1726,7 @@ local api = {
    -- ok: arweave.get_unconfirmed_tx.hash = ""
    --------------------------------------------------------------------
    get_unconfirmed_tx = {
-      scan = "fuzzer",
+      mode = { "fuzzing", "inject" },
       method = "get",
       path = {
          "unconfirmed_tx2",
@@ -1722,7 +1742,7 @@ local api = {
    -- ok: arweave.post_pool_cm_jobs = ""
    --------------------------------------------------------------------
    post_pool_cm_jobs = {
-      scan = "default",
+      mode = { "fingerprint", "fuzzing", "inject" },
       method = "post",
       path = { "pool_cm_jobs" },
       body = ""
@@ -1732,31 +1752,30 @@ local api = {
    -- ok: arweave.post_mine.body = ""
    --------------------------------------------------------------------
    post_mine = {
-      scan = "default",
+      mode = { "fuzzing", "inject" },
       comment = "only activated for testnet miners",
       method = "post",
       path = { "mine" },
       body = ""
    },
 
-
    -- wip: arweave.options_block.fuzzing = true | false
    -- options_block = {
-   --    scan = "full",
+   --    mode = "full",
    --    method = "option",
    --    path = { "block" }
    -- },
 
    -- wip: arweave.options_peers.fuzzing = true | false
    -- options_peer = {
-   --    scan = "full",
+   --    mode = "full",
    --    method = "option",
    --    path = { "peer" }
    -- },
 
    -- wip: arweave.options_tx.fuzzing = true | false
    -- options_tx = {
-   --    scan = "full",
+   --    mode = "full",
    --    method = "tx",
    --    path = { "tx" }
    -- }
@@ -2068,6 +2087,36 @@ local is_gateway = function(host, port)
 end
 
 ----------------------------------------------------------------------
+-- return the api if mode is defined else return nil.
+--
+-- @param api_item table
+-- @param mode string
+-- @return api_item or nil
+----------------------------------------------------------------------
+local has_mode = function(api_item, mode)
+
+   if not(api_item["mode"]) then
+      return nil
+   end
+
+   if type(api_item["mode"]) == "string" and api_item["mode"] == mode then
+      return api_item
+   end
+
+   if type(api_item["mode"]) ~= "table" then
+      return nil
+   end
+
+   for key, value in ipairs(api_item["mode"]) do
+      if value == mode then
+         return api_item
+      end
+   end
+
+   return nil
+end
+
+----------------------------------------------------------------------
 -- postrule
 ----------------------------------------------------------------------
 portrule = shortport.port_or_service(1984, "arweave", "tcp", "open")
@@ -2097,7 +2146,7 @@ action = function(host, port)
       nmap.set_port_version(host, port)
 
       -- get arweave.scan variable, set to "default" by default
-      local scan = stdnse.get_script_args("arweave.scan") or "default"
+      local mode = stdnse.get_script_args("arweave.mode") or "identify"
       local scan_only = stdnse.get_script_args("arweave.scan_only") or nil
       local scan_filter = stdnse.get_script_args("arweave.scan_filter") or nil
       local options = stdnse.get_script_args("arweave.headers") or {}
@@ -2121,7 +2170,7 @@ action = function(host, port)
 
       -- by default, use scan mode previously set
       for key, value in pairs(api) do
-         if value["scan"] == scan then
+         if has_mode(value, mode) then
             result = http_request(host, port, key)
             output[key] = result
          end

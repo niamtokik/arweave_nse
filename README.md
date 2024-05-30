@@ -22,12 +22,46 @@ One can try it on mainnet servers hardcoded in arweave source code:
  - `sgp-1.ap-central-2.arweave.net`
    ([178.128.89.236](https://api.ipapi.is/?q=178.128.89.236))
 
+### Identify Mode
+
+This mode only return basic information on the target.
+
 ```sh
-nmap -p 1984 --script=arweave.nse 206.189.70.139,178.62.222.154,157.230.102.219,139.59.19.218,178.128.89.236
+# default scan, using identify mode
+nmap -p 1984 --script=arweave.nse 206.189.70.139
+
+# forced scan with identify mode
+nmap -p 1984 --script=+arweave.nse 206.189.70.139
 ```
 
-Note: like any nmap script, it can also return XML value with `-oX`
-flag.
+### Fingerprint Mode
+
+This mode is an advanced identify mode, returning more information and
+checking all default end-points.
+
+```sh
+# fingerprint mode
+nmap -p 1984 --script=arweave.nse --script-args="arweave.mode=fingerprint" 206.189.70.139
+```
+
+### (WIP) Fuzzing Mode
+
+This mode create random data for each end-point automatically and
+check the result.
+
+```sh
+# fuzzing mode
+nmap -p 1984 --script=arweave.nse --script-args="arweave.mode=fuzzing" 206.189.70.139
+```
+
+### (WIP) Inject mode
+
+This mode is mainly used to inject crafted data.
+
+```sh
+# inject mode
+nmap -p 1984 --script=arweave.nse --script-args="arweave.mode=inject" 206.189.70.139
+```
 
 ## TODO
 
@@ -37,13 +71,14 @@ flag.
  - [x] HTTP POST method with path parameters and configured body
  - [x] HTTP PUT method with path parameters and configured body
  - [ ] ~~HTTP OPTIONS method~~ (not supported by default nmap library)
- - [ ] Randomized Scanner end-point
+ - [ ] Randomized Scanner end-points
  - [ ] Add arguments supports:
    - [ ] `arweave.http_header_content_type="application/json"`
    - [ ] `arweave.randomize=true`: randomize path scan
-   - [x] `arweave.scan=default`: default scan
-   - [x] `arweave.scan=full` (include default): full scan including post and options
-   - [ ] `arweave.scan=fuzzer` (include default and full): full scan with totally random value
+   - [x] `arweave.mode=identify`: default scan
+   - [x] `arweave.mode=fingerprint`:
+   - [ ] `arweave.mode=fuzzing`:
+   - [ ] `arweave.mode=inject`:
    - [x] `arweave.scan_only=api_id`: scan only one path (bypass scan mode)
    - [x] `arweave.scan_filter=.*`: filter scanned parse (bypass scan mode)
    - [ ] `arweave.http_header_authentication`: add bearer support
