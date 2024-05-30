@@ -63,6 +63,10 @@ This mode is mainly used to inject crafted data.
 nmap -p 1984 --script=arweave.nse --script-args="arweave.mode=inject" 206.189.70.139
 ```
 
+### (WIP) File mode
+
+This mode list files available on the target.
+
 ## TODO
 
  - [x] HTTP GET method support without parameters

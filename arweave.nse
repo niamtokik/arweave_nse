@@ -26,6 +26,7 @@
 --   o a fuzzer using type definition
 --   o a notification mechanism to prevent external service
 --   o a way to fingerprint the version of the server used
+--   o add http pipeline support
 --
 -- -------------------------------------------------------------------
 --
@@ -693,9 +694,7 @@ local api = {
             arg_name = "address",
             default = "",
             fuzzer = {
-               t = "number",
-               size = 32,
-               base = 64
+               t = "transaction"
             }
          },
          "balance"
@@ -714,9 +713,7 @@ local api = {
             arg_name = "address",
             default = "",
             fuzzer = {
-               t = "number",
-               size = 32,
-               base = 64
+               t = "transaction"
             }
          },
          "last_tx"
@@ -734,7 +731,7 @@ local api = {
          "height",
          {
             arg_name = "height",
-            default = "",
+            default = 2048,
             fuzzer = {
                t = "number",
                size = 32,
@@ -755,7 +752,7 @@ local api = {
          "hash",
          {
             arg_name = "hash",
-            default = "",
+            default = "WPdv9IsjqGV8MmYv8X-zUPm4MSM-j_Zo9bkUaec1g34",
             fuzzer = {
                t = "number",
                size = 32,
@@ -777,9 +774,7 @@ local api = {
             arg_name = "tx_id",
             default = "",
             fuzzer = {
-               t = "number",
-               size = 32,
-               base = 64
+               t = "transaction"
             }
          }
       }
@@ -816,7 +811,7 @@ local api = {
          "tx",
          {
             arg_name = "tx_id",
-            default = "",
+            default = "WPdv9IsjqGV8MmYv8X-zUPm4MSM-j_Zo9bkUaec1g34",
             fuzzer = {
                t = "number",
                size = 32,
@@ -837,7 +832,7 @@ local api = {
          "chunk",
          {
             arg_name = "offset",
-            default = "",
+            default = "1234",
             fuzzer = {
                t = "number"
             }
@@ -877,7 +872,7 @@ local api = {
          "frame",
          {
             arg_name = "tx_id",
-            default = "",
+            default = "WPdv9IsjqGV8MmYv8X-zUPm4MSM-j_Zo9bkUaec1g34",
             fuzzer = {
                t = "number",
                size = 32,
@@ -900,7 +895,7 @@ local api = {
          "frame",
          {
             arg_name = "tx_id",
-            default = "",
+            default = "WPdv9IsjqGV8MmYv8X-zUPm4MSM-j_Zo9bkUaec1g34",
             fuzzer = {
                t = "number",
                size = 32,
@@ -1807,9 +1802,12 @@ end
 -- @return random_value
 ----------------------------------------------------------------------
 local fuzzer = function(params)
-   if params["t"] == "number" then
-      return fuzzer_number(params)
+   if params["t"] == "transaction" then
+      return base64_enc(openssl.rand_bytes(32))
    end
+   -- if params["t"] == "number" then
+   --   return fuzzer_number(params)
+   -- end
    error("unsupported fuzzer")
 end
 
@@ -2043,11 +2041,11 @@ end
 -- @param port nmap port structure
 -- @return output or nil
 ----------------------------------------------------------------------
-local is_gateway = function(host, port)
-   local get_root  = http_request(host, port, "get_root")
-   local get_info  = http_request(host, port, "get_info")
-   local head_root = http_request(host, port, "head_root")
-   local head_info = http_request(host, port, "head_info")
+local is_gateway = function(host, port, options)
+   local get_root  = http_request(host, port, "get_root", options)
+   local get_info  = http_request(host, port, "get_info", options)
+   local head_root = http_request(host, port, "head_root", options)
+   local head_info = http_request(host, port, "head_info", options)
 
    -- check if they are returning code 200
    if (get_root.http_status  ~= 200) or
@@ -2150,6 +2148,23 @@ action = function(host, port)
       local scan_only = stdnse.get_script_args("arweave.scan_only") or nil
       local scan_filter = stdnse.get_script_args("arweave.scan_filter") or nil
       local options = stdnse.get_script_args("arweave.headers") or {}
+
+      -- peers mode, only used to return connected peers
+      if mode == "peers" then
+         result = http_request(host, port, "get_peers")
+         peers = result.body
+         table.sort(peers)
+         for i, peer in ipairs(peers) do
+            _, _, ipv4, port = string.find(peer, '^(%d+.%d+.%d+.%d+):(%d+)')
+            if ipv4 and port then
+               output[peer] = {
+                  ipv4 = ipv4,
+                  port = port
+               }
+            end
+         end
+         return output
+      end
 
       -- scan only one path from api
       if scan_only and api[scan_only] then
